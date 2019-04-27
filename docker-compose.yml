@@ -1,0 +1,31 @@
+version: '3'
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+  data_gatherer_node_modules:
+
+services:
+
+  data_gatherer:
+    image: node:8
+    depends_on:
+      - mongo
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./data_gatherer:/data_gatherer
+      - data_gatherer_node_modules:/data_gatherer/node_modules
+    working_dir: /data_gatherer
+    ports:
+      - 3000:3000
+    command: npm run start
+
+  mongo:
+    image: mongo:4
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    ports:
+      - 27017:27017
+    command: mongod

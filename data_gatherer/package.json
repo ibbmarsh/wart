@@ -1,0 +1,16 @@
+{
+  "name": "wart_data_gatherer",
+  "version": "1.0.0",
+  "description": "Data gathering tool for WaRT",
+  "author": "Ibb Marsh <ibb@ibbmarsh.com>",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.16.1",
+    "warframe-items": "latest",
+    "mongodb": "^3.2.3",
+    "deep-equal": "^1.0.1"
+  }
+}
