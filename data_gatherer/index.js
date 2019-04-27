@@ -176,7 +176,6 @@ function buildPrimeData(newData) {
     if (isPrimePartData(dataComponent)) {
       let myComponent = {
         "uid": dataComponent.uniqueName,
-        "name": dataComponent.name,
         "name": adjustComponentName(newData,dataComponent),
         "needed": dataComponent.itemCount,
         "relics": [],
