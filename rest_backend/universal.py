@@ -4,10 +4,10 @@ import json
 
 from rest_backend.db import get_db
 
-bp = Blueprint('universal_endpoints', __name__)
+bp = Blueprint('universal', __name__)
 api = Api(bp)
 
-class UniversalEndpoints(Resource):
+class Universal(Resource):
     def get(self):
         db = get_db()
         last_updated = None
@@ -23,4 +23,4 @@ class UniversalEndpoints(Resource):
             primes.append(prime)
         return {'last_updated': last_updated.isoformat(), 'primes': primes}
 
-api.add_resource(UniversalEndpoints, '/universal_data')
+api.add_resource(Universal, '/universal_data')
