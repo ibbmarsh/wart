@@ -23,8 +23,8 @@ def create_app(test_config=None):
     def hello():
         return "Hello, fools!"
 
-    from . import db, universal_endpoints
+    from . import db, universal
     db.init_app(app)
-    app.register_blueprint(universal_endpoints.bp)
+    app.register_blueprint(universal.bp)
 
     return app
