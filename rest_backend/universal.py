@@ -2,7 +2,10 @@ from flask_restful import Resource, Api
 from flask import Blueprint
 import json
 
-from rest_backend.db import get_db
+from rest_backend.db import (
+    get_db,
+    get_collection_last_updated_max
+)
 
 bp = Blueprint('universal', __name__)
 api = Api(bp)
@@ -10,17 +13,26 @@ api = Api(bp)
 class Universal(Resource):
     def get(self):
         db = get_db()
-        last_updated = None
-        primesCollection = db.primes
-        primes = []
-        for prime in primesCollection.find():
-            new_last_updated = prime['last_updated']
-            if last_updated == None or new_last_updated > last_updated:
-                last_updated = new_last_updated
 
+        primesCollection = db.primes
+        last_updated = get_collection_last_updated_max(primesCollection)
+        primes = []
+        for prime in primesCollection.find({'name':{'$exists':True}}):
             del prime['_id']
-            del prime['last_updated']
             primes.append(prime)
-        return {'last_updated': last_updated.isoformat(), 'primes': primes}
+
+        relicsCollection = db.relics
+        last_updated = get_collection_last_updated_max(
+            relicsCollection, compare_last_updated=last_updated)
+        relics = []
+        for relic in relicsCollection.find({'name':{'$exists':True}}):
+            del relic['_id']
+            relics.append(relic)
+
+        return {
+            'last_updated': last_updated.isoformat(),
+            'primes': primes,
+            'relics': relics,
+        }
 
 api.add_resource(Universal, '/universal_data')

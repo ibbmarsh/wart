@@ -28,9 +28,6 @@ const chanceToRarity = {
   0.02: 'rare',
 }
 
-// And finally a constant time so our update times are consistent.
-const updateTime = new Date();
-
 function driver() {
   // Set up Mongo connection
   client.connect(function(err) {
@@ -84,19 +81,25 @@ function driver() {
     // Resolve all promises before closing the connection and outputting stats
     Promise.all(promises)
     .then((result) => {
-      client.close();
+      // Now that we have resolved all promises, we can check if there have
+      // been any updates or inserts. If so, update the special last_updated
+      // object with today's datetime.
+      updateLastUpdated(db, counter)
+      .then((result) => {
+        client.close();
 
-      console.log("Inserted/Updated/Errored/File");
-      console.log("Primes: "
-        +counter.primesInserted+"/"
-        +counter.primesUpdated+"/"
-        +counter.primesErrored+"/"
-        +counter.primes);
-      console.log("Relics: "
-        +counter.relicsInserted+"/"
-        +counter.relicsUpdated+"/"
-        +counter.relicsErrored+"/"
-        +counter.relics);
+        console.log("Inserted/Updated/Errored/File");
+        console.log("Primes: "
+          +counter.primesInserted+"/"
+          +counter.primesUpdated+"/"
+          +counter.primesErrored+"/"
+          +counter.primes);
+        console.log("Relics: "
+          +counter.relicsInserted+"/"
+          +counter.relicsUpdated+"/"
+          +counter.relicsErrored+"/"
+          +counter.relics);
+      });
     });
   });
 }
@@ -161,12 +164,6 @@ async function createOrUpdatePrimeInDB(db, newData, counter) {
 function buildPrimeData(newData) {
   // This builds up our internal mongo data structure.
   // See https://trac.ibbathon.com/trac/wiki/WaRT/Design/Backend for an example
-  //
-  // Of particular note is that we don't include last_updated here. This is
-  // because we are going to use that lack to compare to existing data when
-  // attempting an update, to determine if there have been any changes.
-  // The insert/update methods handle setting the last_updated right before
-  // making the call to the DB.
 
   let components = [];
   let componentNamesAdded = [];
@@ -235,13 +232,6 @@ async function createOrUpdateRelicInDB(db, newData, counter, wfcdData) {
 function buildRelicData(newData, wfcdData) {
   // This builds up our internal mongo data structure.
   // See https://trac.ibbathon.com/trac/wiki/WaRT/Design/Backend for an example
-  //
-  // Of particular note is that we don't include last_updated here. This is
-  // because we are going to use that lack to compare to existing data when
-  // attempting an update, to determine if there have been any changes.
-  // The insert/update methods handle setting the last_updated right before
-  // making the call to the DB.
-  //
 
   // Build the rewards list from the full wfcdData first.
   let relicName = newData.name;
@@ -293,7 +283,6 @@ function buildRelicData(newData, wfcdData) {
 
 async function insertDataInDB(db, collection, builtData) {
   // Add the timestamp right before inserting
-  builtData.last_updated = updateTime;
   return db.collection(collection)
          .insertOne(builtData);
 }
@@ -301,16 +290,12 @@ async function insertDataInDB(db, collection, builtData) {
 async function updateDataInDB(db, collection, builtData, oldData) {
   // Use the id of the existing data, so we overwrite it.
   builtData._id = oldData._id;
-  // Temporarily set the built data's last_updated to that of the existing.
-  // This will allow us to deep compare to see if we need to update.
-  builtData.last_updated = oldData.last_updated;
 
   if (deepEqual(builtData, oldData)) {
     // They're equal, so just return an empty result.
     return Promise.resolve({});
   } else {
-    // Otherwise, update with the new update time.
-    builtData.last_updated = updateTime;
+    // Otherwise, update
     return db.collection(collection)
            .updateOne({"name": builtData.name},{$set: builtData});
   }
@@ -328,5 +313,37 @@ function adjustComponentName(prime, component) {
     return prime.name+" "+component.name;
   }
 }
+
+async function updateLastUpdated(db, counter) {
+  // Use the same last_updated time for both primes and relics.
+  let updateTime = new Date();
+
+  return Promise.resolve(true)
+  .then((result) => {
+    if (counter.primesInserted > 0 || counter.primesUpdated) {
+      return db.collection(primesCollection)
+             .updateOne(
+               {'last_updated': {$exists: true}},
+               {$set: {'last_updated': updateTime}},
+               {upsert: true}
+             )
+    } else {
+      return Promise.resolve(true)
+    }
+  })
+  .then((result) => {
+    if (counter.relicsInserted > 0 || counter.relicsUpdated) {
+      return db.collection(relicsCollection)
+             .updateOne(
+               {'last_updated': {$exists: true}},
+               {$set: {'last_updated': updateTime}},
+               {upsert: true}
+             )
+    } else {
+      return Promise.resolve(true)
+    }
+  });
+}
+
 
 driver();

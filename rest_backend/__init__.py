@@ -23,8 +23,9 @@ def create_app(test_config=None):
     def hello():
         return "Hello, fools!"
 
-    from . import db, universal
+    from . import db, universal, inventory
     db.init_app(app)
     app.register_blueprint(universal.bp)
+    app.register_blueprint(inventory.bp)
 
     return app
