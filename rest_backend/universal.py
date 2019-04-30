@@ -14,18 +14,18 @@ class Universal(Resource):
     def get(self):
         db = get_db()
 
-        primesCollection = db.primes
-        last_updated = get_collection_last_updated_max(primesCollection)
+        primes_collection = db.primes
+        last_updated = get_collection_last_updated_max(primes_collection)
         primes = []
-        for prime in primesCollection.find({'name':{'$exists':True}}):
+        for prime in primes_collection.find({'name':{'$exists':True}}):
             del prime['_id']
             primes.append(prime)
 
-        relicsCollection = db.relics
+        relics_collection = db.relics
         last_updated = get_collection_last_updated_max(
-            relicsCollection, compare_last_updated=last_updated)
+            relics_collection, compare_last_updated=last_updated)
         relics = []
-        for relic in relicsCollection.find({'name':{'$exists':True}}):
+        for relic in relics_collection.find({'name':{'$exists':True}}):
             del relic['_id']
             relics.append(relic)
 
