@@ -23,9 +23,13 @@ def create_app(test_config=None):
     def hello():
         return "Hello, fools!"
 
-    from . import db, universal, inventory
+    from . import db, universal, inventory, desired, user_preferences, \
+        last_updated, auth
     db.init_app(app)
     app.register_blueprint(universal.bp)
     app.register_blueprint(inventory.bp)
+    app.register_blueprint(desired.bp)
+    app.register_blueprint(user_preferences.bp)
+    app.register_blueprint(last_updated.bp)
 
     return app
