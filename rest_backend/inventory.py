@@ -83,4 +83,4 @@ class Inventory(Resource):
 
 bp = Blueprint('inventory', __name__)
 api = Api(bp)
-api.add_resource(Inventory, '/inventory')
+api.add_resource(Inventory, '/api/v1/inventory')

@@ -61,4 +61,4 @@ class Desired(Resource):
 
 bp = Blueprint('desired', __name__)
 api = Api(bp)
-api.add_resource(Desired, '/desired')
+api.add_resource(Desired, '/api/v1/desired')

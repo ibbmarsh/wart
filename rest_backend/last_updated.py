@@ -43,4 +43,4 @@ class LastUpdated(Resource):
 
 bp = Blueprint('last_updated', __name__)
 api = Api(bp)
-api.add_resource(LastUpdated, '/last_updated')
+api.add_resource(LastUpdated, '/api/v1/last_updated')

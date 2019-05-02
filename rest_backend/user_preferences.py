@@ -61,4 +61,4 @@ class UserPreferences(Resource):
 
 bp = Blueprint('user_preferences', __name__)
 api = Api(bp)
-api.add_resource(UserPreferences, '/user_preferences')
+api.add_resource(UserPreferences, '/api/v1/user_preferences')

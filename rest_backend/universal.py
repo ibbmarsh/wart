@@ -35,4 +35,4 @@ class Universal(Resource):
             'relics': relics,
         }
 
-api.add_resource(Universal, '/universal_data')
+api.add_resource(Universal, '/api/v1/universal_data')
