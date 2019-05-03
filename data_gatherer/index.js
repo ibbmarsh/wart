@@ -15,11 +15,22 @@ const relicsCollection = 'relics';
 // Constants as helpers
 const primeWhitelist = [
   'Kavasa Prime Kubrow Collar',
-  'Prime Laser Rifle',
 ];
 const primeBlacklist = [
+  // These are accessories which can only be purchased.
   'Chordalla Prime',
   'Pedestal Prime',
+  // Founder items can't be gotten from relics, so I don't want them here.
+  'Excalibur Prime',
+  'Lato Prime',
+  'Skana Prime',
+  // The extractors are only available by purchasing vault packs.
+  'Titan Extractor Prime',
+  'Distilling Extractor Prime',
+  // Sentinel weapons are awarded automatically upon acquiring the sentinel.
+  'Deconstructor Prime',
+  'Sweeper Prime',
+  'Prime Laser Rifle',
 ];
 const chanceToRarity = {
   // TODO: find a better way to determine rarity than hardcoding decimals
@@ -128,6 +139,9 @@ function isPrimePartData(data) {
     // We're only interested in drops which can be traded for ducats, as
     // non-prime-part components will not have that quality.
     "ducats" in data
+    // Except for the Kavasa collar, for some bizarre reason.
+    || data.name == "Kavasa Prime Band"
+    || data.name == "Kavasa Prime Buckle"
   );
 }
 
@@ -187,6 +201,13 @@ function buildPrimeData(newData) {
       // We've built our version of the component, push it.
       components.push(myComponent);
     }
+  }
+
+  // The special case of the Kavasa Prime collar.
+  // The name from the data is "Kavasa Prime Kubrow Collar",
+  // but we want the simpler "Kavasa Prime Collar" (which matches wiki).
+  if (newData.name === "Kavasa Prime Kubrow Collar") {
+    newData.name = "Kavasa Prime Collar";
   }
 
   // Now that the annoyance of components is dealt with, the actual
@@ -308,6 +329,14 @@ function adjustComponentName(prime, component) {
   // There are only a few exceptions to this issue, and they can be handled
   // by looking for the word Prime in the component name.
   if (component.name.match(/Prime/)) {
+    // The special case of the Kavasa Prime collar. For some reason,
+    // the API returns them as "Kavasa Prime [name]" instead of
+    // "Kavasa Prime Collar [name]". We need the latter in order for the
+    // interface to look nice.
+    if (component.name.match(/Kavasa Prime/)) {
+      return component.name.replace(/Kavasa Prime/, "Kavasa Prime Collar");
+    }
+
     return component.name;
   } else {
     return prime.name+" "+component.name;
