@@ -5,6 +5,7 @@ volumes:
   mongodb_config:
   data_gatherer_node_modules:
   rest_backend_pip_modules:
+  server_frontend_node_modules:
 
 services:
 
@@ -44,3 +45,17 @@ services:
     ports:
       - "50017:27017"
     command: mongod
+
+  server_frontend:
+    image: node:8
+    depends_on:
+      - rest_backend
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./server_frontend:/server_frontend
+      - server_frontend_node_modules:/server_frontend/node_modules
+    working_dir: /server_frontend
+    ports:
+      - "50002:3000"
+    command: npm start

@@ -1,0 +1,72 @@
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 20px;
+}
+
+.react-tabs__tab-list {
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+}
+
+.react-tabs__tab {
+  border: 1px solid #999;
+  width: 10em;
+  text-align: center;
+  cursor: pointer;
+}
+
+.react-tabs__tab--selected {
+  background: #ff9999;
+}
+
+.primes_list {
+  display: flex;
+  flex-direction: column;
+  min-width: 1000px;
+}
+
+.prime_row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 5px;
+}
+
+.prime_row label {
+  white-space: nowrap;
+}
+
+.prime_row .parts {
+  display: flex;
+  flex-direction: row;
+}
+
+.prime_row .prime {
+  width: 15em;
+  padding: 1px 5px 1px 1px;
+  border: solid 1px #000;
+}
+
+.prime_row .prime label {
+  display: block;
+  width: 10em;
+}
+
+.prime_row .part {
+  width: 5em;
+  padding: 1px 5px 1px 1px;
+  border: solid 1px #000;
+}
+
+.prime_row .part label {
+  display: block;
+  width: 8em;
+}
+
+.prime_row .parts {
+  width: 80%;
+}
+
+.primes_list input {
+  width: 2em;
+}
