@@ -1,6 +1,7 @@
 from flask_restful import Resource, Api
 from flask import Blueprint
 import json
+import pymongo
 
 from rest_backend.db import (
     get_db,
@@ -17,15 +18,21 @@ class Universal(Resource):
         primes_collection = db.primes
         last_updated = get_collection_last_updated_max(primes_collection)
         primes = []
-        for prime in primes_collection.find({'name':{'$exists':True}}):
+        for prime in primes_collection \
+                     .find({'name':{'$exists':True}}) \
+                     .sort('name'):
             del prime['_id']
+            prime['components'].sort(key=lambda c: c['name'])
             primes.append(prime)
 
         relics_collection = db.relics
         last_updated = get_collection_last_updated_max(
             relics_collection, compare_last_updated=last_updated)
         relics = []
-        for relic in relics_collection.find({'name':{'$exists':True}}):
+        for relic in relics_collection \
+                     .find({'name':{'$exists':True}}) \
+                     .sort([('era_num', pymongo.ASCENDING), \
+                            ('code_padded', pymongo.ASCENDING)]):
             del relic['_id']
             relics.append(relic)
 

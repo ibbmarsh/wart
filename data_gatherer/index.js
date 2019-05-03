@@ -293,10 +293,15 @@ function buildRelicData(newData, wfcdData) {
   // Now that we have pre-processing finished, the data is simple to build.
   let i1 = relicName.indexOf(" ");
   let i2 = relicName.indexOf(" Intact");
+  let name = relicName.slice(0,i2);
+  let era = relicName.slice(0,i1);
+  let code = relicName.slice(i1+1,i2);
   return {
     "name": relicName.slice(0,i2),
     "era": relicName.slice(0,i1),
-    "code": relicName.slice(i1+1,i2),
+    "era_num": eraToNum(era),
+    "code": code,
+    "code_padded": padCode(code),
     "vaulted": !("drops" in newData),
     "rewards": rewards,
   };
@@ -372,6 +377,28 @@ async function updateLastUpdated(db, counter) {
       return Promise.resolve(true)
     }
   });
+}
+
+function eraToNum(era) {
+  const eraToNumDict = {
+    "Lith": 0,
+    "Meso": 1,
+    "Neo": 2,
+    "Axi": 3,
+  };
+
+  return eraToNumDict[era];
+}
+
+function padCode(code) {
+  const letter = code.slice(0,1);
+  const numPart = parseInt(code.slice(1));
+
+  if (numPart < 10) {
+    return letter+"0"+numPart;
+  } else {
+    return code;
+  }
 }
 
 
