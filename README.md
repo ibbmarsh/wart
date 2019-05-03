@@ -1,6 +1,9 @@
 # WaRT
 Warframe Relic Tracker
 
+## Design Notes and Tickets
+All design notes and ticket-tracking will occur on my personal Trac site: https://trac.ibbmarsh.com.
+
 ## Setup
 
 ### Dependencies
