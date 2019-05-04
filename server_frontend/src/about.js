@@ -8,6 +8,7 @@ class About extends React.Component {
         <div>You can find the source for this server on its <a href="https://github.com/ibbmarsh/wart">GitHub repo</a>.</div>
         <div>To use this site:
           <ol>
+            <li>Log in via the Google Sign-in link.</li>
             <li>Enter your entire prime inventory on the Inventory tab.</li>
             <li>Select which primes you wish to prioritize on the Wishlist page.</li>
             <li>Use the Relic Run tab when running fissures to determine which reward to pick.</li>

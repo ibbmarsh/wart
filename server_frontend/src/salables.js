@@ -1,5 +1,10 @@
 import React from 'react';
 
+import {
+  findPrimeAndComponentFromPartName,
+  findOwnedByName,
+} from './helpers.js';
+
 class SalablesRow extends React.Component {
   constructor(props) {
     super(props);
@@ -51,18 +56,6 @@ class SalablesRow extends React.Component {
 }
 
 class Salables extends React.Component {
-  findPrimeDataFromPartName(name) {
-    // Split into a helper function so we can just return when we find it.
-    for (const prime of this.props.primes) {
-      for (const component of prime.components) {
-        if (component.name === name) {
-          return [prime, component];
-        }
-      }
-    }
-    return null;
-  }
-
   render() {
     let salables = [];
     for (const part of this.props.partsInventory) {
@@ -72,7 +65,8 @@ class Salables extends React.Component {
       // 3) Do we have more parts than needed?
 
       // All 3 checks require finding the prime data first.
-      let [prime, component] = this.findPrimeDataFromPartName(part.name);
+      let [prime, component] =
+        findPrimeAndComponentFromPartName(part.name, this.props.primes);
       if (prime === null) {
         console.error("Failed to find prime corresponding to part %s",
           part.name);
@@ -80,22 +74,10 @@ class Salables extends React.Component {
       }
 
       // 1) Check if the prime is owned.
-      let owned = false;
-      for (const primeInv of this.props.primesInventory) {
-        if (primeInv.name === prime.name) {
-          owned = primeInv.count > 0;
-          break;
-        }
-      }
+      let owned = findOwnedByName(prime.name, this.props.primesInventory) > 0;
 
       // 2) Check if the prime is desired.
-      let desired = false;
-      for (const desire of this.props.desired) {
-        if (desire.name === prime.name) {
-          desired = true;
-          break;
-        }
-      }
+      let desired = findOwnedByName(prime.name, this.props.desired) > 0;
 
       // 3) Use the two previous checks to see if we need this part.
       let needed = 0;

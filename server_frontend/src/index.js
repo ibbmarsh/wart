@@ -117,7 +117,7 @@ class WaRT extends React.Component {
   render() {
     // TODO: remove defaultIndex from Tabs; it is only for rapidly testing a tab
     return (
-      <Tabs defaultIndex={3} >
+      <Tabs defaultIndex={4} >
         <TabList>
           <Tab><div className="logo"><span className="logo-spiffy">Wa</span>rframe <span className="logo-spiffy">R</span>elic <span className="logo-spiffy">T</span>racker</div></Tab>
           <Tab>Inventory</Tab>
@@ -156,7 +156,14 @@ class WaRT extends React.Component {
           />
         </TabPanel>
         <TabPanel>
-          <RelicRun />
+          <RelicRun
+            primes={this.state.primes}
+            relics={this.state.relics}
+            primesInventory={this.state.primes_inventory}
+            partsInventory={this.state.parts_inventory}
+            desired={this.state.desired}
+            onCountChange={this.onCountChange}
+          />
         </TabPanel>
       </Tabs>
     );
