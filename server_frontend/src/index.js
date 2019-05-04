@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import axios from 'axios';
 
+import { RestCalls } from './rest_calls.js';
 import { Inventory } from './inventory.js';
 import { Wishlist } from './wishlist.js';
 import { Salables } from './salables.js';
@@ -24,190 +24,76 @@ class WaRT extends React.Component {
       "last_updated": {},
     };
 
+    this.refreshAllOnChange = this.refreshAllOnChange.bind(this);
     this.onCountChange = this.onCountChange.bind(this);
     this.onDesiredChange = this.onDesiredChange.bind(this);
     this.onBuildClick = this.onBuildClick.bind(this);
+
+    this.restCalls = new RestCalls("http://localhost:50001");
+  }
+
+  refreshAllOnChange(result) {
+    this.refreshAllREST();
   }
 
   refreshAllREST() {
-    // Universal Data
-    axios.get("http://localhost:50001/api/v1/universal_data")
-    .then(response => {
-      const newState = Object.assign(
-        {},
-        this.state,
-        {
-          "primes": response.data.primes,
-          "relics": response.data.relics,
-        }
-      );
+    this.restCalls.refreshAllREST()
+    .then(newState => {
       this.setState(newState);
-    })
-    .catch(error => console.error(error));
-
-    // Inventory
-    axios.get("http://localhost:50001/api/v1/inventory")
-    .then(response => {
-      const newState = Object.assign(
-        {},
-        this.state,
-        {
-          "parts_inventory": response.data.parts_inventory,
-          "primes_inventory": response.data.primes_inventory,
-        }
-      );
-      this.setState(newState);
-    })
-    .catch(error => console.error(error));
-
-    // Wishlist
-    axios.get("http://localhost:50001/api/v1/desired")
-    .then(response => {
-      const newState = Object.assign(
-        {},
-        this.state,
-        {
-          "desired": response.data.desired,
-        }
-      );
-      this.setState(newState);
-    })
-    .catch(error => console.error(error));
-
-    // Preferences
-    axios.get("http://localhost:50001/api/v1/user_preferences")
-    .then(response => {
-      const newState = Object.assign(
-        {},
-        this.state,
-        {
-        }
-      );
-      this.setState(newState);
-    })
-    .catch(error => console.error(error));
-
-    // Last Updated
-    axios.get("http://localhost:50001/api/v1/last_updated")
-    .then(response => {
-      const newState = Object.assign(
-        {},
-        this.state,
-        {
-          "last_updated": response.data,
-        }
-      );
-      this.setState(newState);
-    })
-    .catch(error => console.error(error));
-  }
-
-  onCountChange(type, itemName, itemUid, itemCount) {
-    let payload = {};
-    payload[type+"s_inventory"] = [{
-      "uid": itemUid,
-      "name": itemName,
-      "count": itemCount
-    }];
-    axios.put("http://localhost:50001/api/v1/inventory", payload)
-    .then((response) => {
-      this.refreshAllREST();
-    })
-    .catch(error => console.error(error));
-  }
-
-  onDesiredChange(name, uid, desired) {
-    const payload = {"desired":[{
-      "name": name,
-      "uid": uid,
-      "is_desired": desired,
-    }]};
-    axios.put("http://localhost:50001/api/v1/desired", payload)
-    .then((response) => {
-      this.refreshAllREST();
-    })
-    .catch(error => console.error(error));
-  }
-
-  onBuildClick(name) {
-    let inventoryPayload = {"primes_inventory":[], "parts_inventory":[]};
-    let desiredPayload = {"desired":[]};
-
-    // Find the prime we're talking about.
-    let prime = null;
-    for (const p of this.state.primes) {
-      if (p.name === name) {
-        prime = p;
-        break;
-      }
-    }
-    if (prime === null) {
-      console.error("Could not find prime %s",name);
-      return;
-    }
-
-    // We have the prime data, but now we need the current inventory counts
-    // for the prime and each part.
-    let count = 0;
-    for (const p of this.state.primes_inventory) {
-      if (p.name === name) {
-        count = p.count;
-        break;
-      }
-    }
-    inventoryPayload.primes_inventory.push({
-      "uid": prime.uid,
-      "name": name,
-      "count": count+1,
-    });
-    // Part counts now.
-    for (const c of prime.components) {
-      let count = 0;
-      for (const p of this.state.parts_inventory) {
-        if (p.name === c.name) {
-          count = p.count;
-          break;
-        }
-      }
-      inventoryPayload.parts_inventory.push({
-        "uid": c.uid,
-        "name": c.name,
-        "count": count-c.needed,
-      });
-    }
-
-    // Finally, the desired payload.
-    desiredPayload.desired.push({
-      "uid": prime.uid,
-      "name": name,
-      "is_desired": false,
-    });
-
-    axios.put("http://localhost:50001/api/v1/inventory",inventoryPayload)
-    .then(response => {
-      return axios.put("http://localhost:50001/api/v1/desired",desiredPayload)
-    })
-    .then(response => {
-      this.refreshAllREST();
     })
     .catch(error => console.error(error));
   }
 
   checkForUpdates() {
-    axios
-    .get("http://localhost:50001/api/v1/last_updated")
-    .then(response => {
-      let updateNeeded = false;
-      for (let k in this.state.last_updated) {
-        if (this.state.last_updated[k] < response.data[k]) {
-          updateNeeded = true;
-          break;
-        }
-      }
+    let data = {
+      last_updated: this.state.last_updated,
+    }
+    this.restCalls.checkForUpdates(data)
+    .then(updateNeeded => {
       if (updateNeeded) {
         this.refreshAllREST();
       }
     })
+    .catch(error => console.error(error));
+  }
+
+  onCountChange(type, name, uid, count) {
+    let data = {
+      uid: uid,
+      name: name,
+      count: count,
+    }
+    if (type === "prime") {
+      this.restCalls.onPrimeCountChange(data)
+      .then(this.refreshAllOnChange)
+      .catch(error => console.error(error));
+    } else {
+      this.restCalls.onPartCountChange(data)
+      .then(this.refreshAllOnChange)
+      .catch(error => console.error(error));
+    }
+  }
+
+  onDesiredChange(name, uid, is_desired) {
+    let data = {
+      uid: uid,
+      name: name,
+      is_desired: is_desired,
+    };
+    this.restCalls.onDesiredChange(data)
+    .then(this.refreshAllOnChange)
+    .catch(error => console.error(error));
+  }
+
+  onBuildClick(name) {
+    let data = {
+      name: name,
+      primes: this.state.primes,
+      primes_inventory: this.state.primes_inventory,
+      parts_inventory: this.state.parts_inventory,
+    }
+    this.restCalls.onBuildClick(data)
+    .then(this.refreshAllOnChange)
     .catch(error => console.error(error));
   }
 
