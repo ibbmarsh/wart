@@ -70,3 +70,31 @@ body {
 .primes_list input {
   width: 2em;
 }
+
+.wishlist-list {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  height: 900px;
+  align-content: flex-start;
+}
+
+.wishlist-row {
+  display: flex;
+  flex-direction: row;
+  border: solid 1px #000;
+  width: 15em;
+  padding: 2px 0px 2px 1px;
+  margin: 0px 5px 2px 0px;
+}
+
+.wishlist-row label {
+  width: 10em;
+}
+
+.wishlist-row input[type="checkbox"] {
+}
+
+.wishlist-row input[type="button"] {
+  margin-left: 5px;
+}

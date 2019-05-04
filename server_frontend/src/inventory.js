@@ -44,7 +44,7 @@ class PrimeItem extends React.Component {
       labelText = labelText.replace(this.props.parentName,"");
     }
 
-    const primeName = this.props.item.name
+    const primeId = this.props.item.name
                     .toLowerCase()
                     .replace(/ /g,"_");
 
@@ -52,9 +52,9 @@ class PrimeItem extends React.Component {
 
     return (
       <div className={this.props.type}>
-        <label htmlFor={primeName}>{labelText}</label>
+        <label htmlFor={primeId}>{labelText}</label>
         <input
-          id={primeName}
+          id={primeId}
           value={this.state.count===undefined ? count : this.state.count}
           onChange={this.handleChange}
         />

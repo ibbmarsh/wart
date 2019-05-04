@@ -19,9 +19,14 @@ class WaRT extends React.Component {
       "relics": [],
       "primes_inventory": [],
       "parts_inventory": [],
+      "desired": [],
       "user_preferences": {},
       "last_updated": {},
     };
+
+    this.onCountChange = this.onCountChange.bind(this);
+    this.onDesiredChange = this.onDesiredChange.bind(this);
+    this.onBuildClick = this.onBuildClick.bind(this);
   }
 
   refreshAllREST() {
@@ -97,7 +102,7 @@ class WaRT extends React.Component {
     .catch(error => console.error(error));
   }
 
-  updateInventoryToServer(type, itemName, itemUid, itemCount) {
+  onCountChange(type, itemName, itemUid, itemCount) {
     let payload = {};
     payload[type+"s_inventory"] = [{
       "uid": itemUid,
@@ -106,11 +111,83 @@ class WaRT extends React.Component {
     }];
     axios.put("http://localhost:50001/api/v1/inventory", payload)
     .then((response) => {
-      let newState = Object.assign({},this.state);
-      // Update the last_updated from the response, which contains
-      // the server's update time.
-      newState.last_updated.inventory = response.data.last_updated;
-      this.setState(newState);
+      this.refreshAllREST();
+    })
+    .catch(error => console.error(error));
+  }
+
+  onDesiredChange(name, uid, desired) {
+    const payload = {"desired":[{
+      "name": name,
+      "uid": uid,
+      "is_desired": desired,
+    }]};
+    axios.put("http://localhost:50001/api/v1/desired", payload)
+    .then((response) => {
+      this.refreshAllREST();
+    })
+    .catch(error => console.error(error));
+  }
+
+  onBuildClick(name) {
+    let inventoryPayload = {"primes_inventory":[], "parts_inventory":[]};
+    let desiredPayload = {"desired":[]};
+
+    // Find the prime we're talking about.
+    let prime = null;
+    for (const p of this.state.primes) {
+      if (p.name === name) {
+        prime = p;
+        break;
+      }
+    }
+    if (prime === null) {
+      console.error("Could not find prime %s",name);
+      return;
+    }
+
+    // We have the prime data, but now we need the current inventory counts
+    // for the prime and each part.
+    let count = 0;
+    for (const p of this.state.primes_inventory) {
+      if (p.name === name) {
+        count = p.count;
+        break;
+      }
+    }
+    inventoryPayload.primes_inventory.push({
+      "uid": prime.uid,
+      "name": name,
+      "count": count+1,
+    });
+    // Part counts now.
+    for (const c of prime.components) {
+      let count = 0;
+      for (const p of this.state.parts_inventory) {
+        if (p.name === c.name) {
+          count = p.count;
+          break;
+        }
+      }
+      inventoryPayload.parts_inventory.push({
+        "uid": c.uid,
+        "name": c.name,
+        "count": count-c.needed,
+      });
+    }
+
+    // Finally, the desired payload.
+    desiredPayload.desired.push({
+      "uid": prime.uid,
+      "name": name,
+      "is_desired": false,
+    });
+
+    axios.put("http://localhost:50001/api/v1/inventory",inventoryPayload)
+    .then(response => {
+      return axios.put("http://localhost:50001/api/v1/desired",desiredPayload)
+    })
+    .then(response => {
       this.refreshAllREST();
     })
     .catch(error => console.error(error));
@@ -151,8 +228,9 @@ class WaRT extends React.Component {
   }
 
   render() {
+    // TODO: remove defaultIndex from Tabs; it is only for rapidly testing a tab
     return (
-      <Tabs>
+      <Tabs defaultIndex={1} >
         <TabList>
           <Tab>Inventory</Tab>
           <Tab>Wishlist</Tab>
@@ -165,11 +243,17 @@ class WaRT extends React.Component {
             primes={this.state.primes}
             primesInventory={this.state.primes_inventory}
             partsInventory={this.state.parts_inventory}
-            onCountChange={(a,b,c,d) => this.updateInventoryToServer(a,b,c,d)}
+            onCountChange={this.onCountChange}
           />
         </TabPanel>
         <TabPanel>
-          <Wishlist />
+          <Wishlist
+            primes={this.state.primes}
+            partsInventory={this.state.parts_inventory}
+            desired={this.state.desired}
+            onDesiredChange={this.onDesiredChange}
+            onBuildClick={this.onBuildClick}
+          />
         </TabPanel>
         <TabPanel>
           <Salables />
