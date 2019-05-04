@@ -3,12 +3,8 @@ body {
   margin: 2em;
 }
 
-header {
-  position: absolute;
-  left: 2em;
-  top: 2em;
-  width: 11em;
-  color: #777;
+.logo {
+  color: #666;
 }
 
 .logo-spiffy {
@@ -16,9 +12,6 @@ header {
 }
 
 .react-tabs__tab-list {
-  position: absolute;
-  left: 13em;
-  top: 2em;
   margin: 0px;
   padding: 0px;
   display: flex;
@@ -28,7 +21,8 @@ header {
 
 .react-tabs__tab {
   border: 1px solid #999;
-  width: 10em;
+  width: fit-content;
+  padding: 2px;
   text-align: center;
   cursor: pointer;
 }
@@ -38,7 +32,7 @@ header {
 }
 
 .react-tabs__tab-panel {
-  margin-top: 5em;
+  margin-top: 1em;
 }
 
 .primes_list {

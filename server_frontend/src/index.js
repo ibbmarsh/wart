@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
 import { RestCalls } from './rest_calls.js';
+import { About } from './about.js';
 import { Inventory } from './inventory.js';
 import { Wishlist } from './wishlist.js';
 import { Salables } from './salables.js';
@@ -116,49 +117,48 @@ class WaRT extends React.Component {
   render() {
     // TODO: remove defaultIndex from Tabs; it is only for rapidly testing a tab
     return (
-      <div className="wart">
-        <header>
-          <span className="logo-spiffy">Wa</span>rframe <span className="logo-spiffy">R</span>elic <span className="logo-spiffy">T</span>racker
-        </header>
-        <Tabs defaultIndex={2} >
-          <TabList>
-            <Tab>Inventory</Tab>
-            <Tab>Wishlist</Tab>
-            <Tab>Salables</Tab>
-            <Tab>Relic Run</Tab>
-          </TabList>
+      <Tabs defaultIndex={3} >
+        <TabList>
+          <Tab><div className="logo"><span className="logo-spiffy">Wa</span>rframe <span className="logo-spiffy">R</span>elic <span className="logo-spiffy">T</span>racker</div></Tab>
+          <Tab>Inventory</Tab>
+          <Tab>Wishlist</Tab>
+          <Tab>Salables</Tab>
+          <Tab>Relic Run</Tab>
+        </TabList>
 
-          <TabPanel>
-            <Inventory
-              primes={this.state.primes}
-              primesInventory={this.state.primes_inventory}
-              partsInventory={this.state.parts_inventory}
-              onCountChange={this.onCountChange}
-            />
-          </TabPanel>
-          <TabPanel>
-            <Wishlist
-              primes={this.state.primes}
-              partsInventory={this.state.parts_inventory}
-              desired={this.state.desired}
-              onDesiredChange={this.onDesiredChange}
-              onBuildClick={this.onBuildClick}
-            />
-          </TabPanel>
-          <TabPanel>
-            <Salables
-              primes={this.state.primes}
-              primesInventory={this.state.primes_inventory}
-              partsInventory={this.state.parts_inventory}
-              desired={this.state.desired}
-              onCountChange={this.onCountChange}
-            />
-          </TabPanel>
-          <TabPanel>
-            <RelicRun />
-          </TabPanel>
-        </Tabs>
-      </div>
+        <TabPanel>
+          <About />
+        </TabPanel>
+        <TabPanel>
+          <Inventory
+            primes={this.state.primes}
+            primesInventory={this.state.primes_inventory}
+            partsInventory={this.state.parts_inventory}
+            onCountChange={this.onCountChange}
+          />
+        </TabPanel>
+        <TabPanel>
+          <Wishlist
+            primes={this.state.primes}
+            partsInventory={this.state.parts_inventory}
+            desired={this.state.desired}
+            onDesiredChange={this.onDesiredChange}
+            onBuildClick={this.onBuildClick}
+          />
+        </TabPanel>
+        <TabPanel>
+          <Salables
+            primes={this.state.primes}
+            primesInventory={this.state.primes_inventory}
+            partsInventory={this.state.parts_inventory}
+            desired={this.state.desired}
+            onCountChange={this.onCountChange}
+          />
+        </TabPanel>
+        <TabPanel>
+          <RelicRun />
+        </TabPanel>
+      </Tabs>
     );
   }
 }
