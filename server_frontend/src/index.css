@@ -243,4 +243,6 @@ body {
   padding: 0px;
 }
 
-.relic-list ul li {}
+.relic-list ul li {
+  cursor: pointer;
+}
