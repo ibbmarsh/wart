@@ -189,6 +189,7 @@ function buildPrimeData(newData) {
         "uid": dataComponent.uniqueName,
         "name": adjustComponentName(newData,dataComponent),
         "needed": dataComponent.itemCount,
+        "ducats": dataComponent.ducats,
         "relics": [],
       };
       // Now run through the relics, grab the Intact ones and strip "Intact".
@@ -281,7 +282,7 @@ function buildRelicData(newData, wfcdData) {
           let reward = {
             "uid": component.uniqueName,
             "name": adjustComponentName(prime,component),
-            "chance": chanceToRarity[drop.chance],
+            "rarity": chanceToRarity[drop.chance],
             "ducats": component.ducats,
           };
           rewards.push(reward);

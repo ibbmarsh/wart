@@ -21,7 +21,8 @@ class Inventory(Resource):
         for prime in primes_inventory_collection.find({
                 'user_id': user_id,
                 'count': {'$gt': 0},
-                'last_updated': {'$exists': False}}):
+                'last_updated': {'$exists': False}}) \
+                .sort('name'):
             del prime['_id']
             del prime['user_id']
             primes_inventory.append(prime)
@@ -34,7 +35,8 @@ class Inventory(Resource):
         for part in parts_inventory_collection.find({
                 'user_id': user_id,
                 'count': {'$gt': 0},
-                'last_updated': {'$exists': False}}):
+                'last_updated': {'$exists': False}}) \
+                .sort('name'):
             del part['_id']
             del part['user_id']
             parts_inventory.append(part)

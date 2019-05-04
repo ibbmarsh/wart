@@ -1,9 +1,26 @@
 body {
   font: 14px "Century Gothic", Futura, sans-serif;
-  margin: 20px;
+  margin: 2em;
+}
+
+header {
+  position: absolute;
+  left: 2em;
+  top: 2em;
+  width: 11em;
+  color: #777;
+}
+
+.logo-spiffy {
+  color: #000;
 }
 
 .react-tabs__tab-list {
+  position: absolute;
+  left: 13em;
+  top: 2em;
+  margin: 0px;
+  padding: 0px;
   display: flex;
   flex-direction: row;
   list-style: none;
@@ -17,7 +34,11 @@ body {
 }
 
 .react-tabs__tab--selected {
-  background: #ff9999;
+  background: #8888ff;
+}
+
+.react-tabs__tab-panel {
+  margin-top: 5em;
 }
 
 .primes_list {
@@ -97,4 +118,31 @@ body {
 
 .wishlist-row input[type="button"] {
   margin-left: 5px;
+}
+
+.salables-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.salables-row {
+  display: flex;
+  flex-direction: row;
+  border: solid 1px #000;
+  width: 30em;
+  padding: 2px 0px 2px 1px;
+  margin: 0px 5px 2px 0px;
+}
+
+.salables-row label {
+  width: 15em;
+}
+
+.salables-row .ducats {
+  width: 10em;
+  text-align: left;
+}
+
+.salables-row .plat {
+  width: 7em;
 }
