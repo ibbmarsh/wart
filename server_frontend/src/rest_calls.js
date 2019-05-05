@@ -136,59 +136,14 @@ class RestCalls {
     });
   }
 
-  onBuildClick({name, primes, primes_inventory, parts_inventory}) {
-    let inventoryPayload = {"primes_inventory":[], "parts_inventory":[]};
-    let desiredPayload = {"desired":[]};
-
-    // Find the prime we're talking about.
-    let prime = null;
-    for (const p of primes) {
-      if (p.name === name) {
-        prime = p;
-        break;
-      }
+  onBuildClick(data) {
+    let inventoryPayload = {
+      "primes_inventory": data.primes_inventory,
+      "parts_inventory": data.parts_inventory,
     }
-    if (prime === null) {
-      console.error("Could not find prime %s",name);
-      return;
+    let desiredPayload = {
+      "desired": data.desired,
     }
-
-    // We have the prime data, but now we need the current inventory counts
-    // for the prime and each part.
-    let count = 0;
-    for (const p of primes_inventory) {
-      if (p.name === name) {
-        count = p.count;
-        break;
-      }
-    }
-    inventoryPayload.primes_inventory.push({
-      "uid": prime.uid,
-      "name": name,
-      "count": count+1,
-    });
-    // Part counts now.
-    for (const c of prime.components) {
-      let count = 0;
-      for (const p of parts_inventory) {
-        if (p.name === c.name) {
-          count = p.count;
-          break;
-        }
-      }
-      inventoryPayload.parts_inventory.push({
-        "uid": c.uid,
-        "name": c.name,
-        "count": count-c.needed,
-      });
-    }
-
-    // Finally, the desired payload.
-    desiredPayload.desired.push({
-      "uid": prime.uid,
-      "name": name,
-      "is_desired": false,
-    });
 
     let axios1 = axios.put(this.baseUrl+"/api/v1/inventory",inventoryPayload);
     let axios2 = axios.put(this.baseUrl+"/api/v1/desired",desiredPayload);

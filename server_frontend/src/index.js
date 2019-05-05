@@ -9,7 +9,10 @@ import { Wishlist } from './wishlist.js';
 import { Salables } from './salables.js';
 import { RelicRun } from './relicrun.js';
 
-import { buildLastUpdated } from './helpers.js';
+import {
+  buildLastUpdated,
+  buildBuildClickData,
+} from './helpers.js';
 
 import './index.css';
 
@@ -31,13 +34,7 @@ class WaRT extends React.Component {
     this.onDesiredChange = this.onDesiredChange.bind(this);
     this.onBuildClick = this.onBuildClick.bind(this);
 
-    this.checkForUpdatesOnChange = this.checkForUpdatesOnChange.bind(this);
-
     this.restCalls = new RestCalls("http://localhost:50001");
-  }
-
-  checkForUpdatesOnChange(result) {
-    this.checkForUpdates();
   }
 
   refreshAllREST() {
@@ -51,7 +48,7 @@ class WaRT extends React.Component {
   checkForUpdates() {
     let data = {
       last_updated: this.state.last_updated,
-    }
+    };
     this.restCalls.checkForUpdates(data)
     .then(newStateData => {
       const lastUpdated = buildLastUpdated(this.state, newStateData);
@@ -64,44 +61,119 @@ class WaRT extends React.Component {
     .catch(error => console.error(error));
   }
 
+  /*
+   * Called when an inventory count is updated from somewhere.
+   * Updates the internal state and then uses RestCalls to update the server.
+   */
   onCountChange(type, name, uid, count) {
-    let data = {
+    const data = {
       uid: uid,
       name: name,
       count: count,
-    }
+    };
     if (type === "prime") {
+      this.updateState("primes_inventory", data);
       this.restCalls.onPrimeCountChange(data)
-      .then(this.checkForUpdatesOnChange)
+      .then(this.updateLastUpdated.bind(this, "inventory"))
       .catch(error => console.error(error));
     } else {
+      this.updateState("parts_inventory", data);
       this.restCalls.onPartCountChange(data)
-      .then(this.checkForUpdatesOnChange)
+      .then(this.updateLastUpdated.bind(this, "inventory"))
       .catch(error => console.error(error));
     }
   }
 
+  /*
+   * Called when a wishlist item is updated from somewhere.
+   * Updates the internal state and then uses RestCalls to update the server.
+   */
   onDesiredChange(name, uid, is_desired) {
-    let data = {
+    const data = {
       uid: uid,
       name: name,
       is_desired: is_desired,
     };
+    this.updateState("desired", data, {
+      shouldDelete: !is_desired,
+    });
     this.restCalls.onDesiredChange(data)
-    .then(this.checkForUpdatesOnChange)
+    .then(this.updateLastUpdated.bind(this, "desired"))
     .catch(error => console.error(error));
   }
 
+  /*
+   * Called when the build button is clicked on the wishlist.
+   * Updates the internal states and then uses RestCalls to update the server.
+   */
   onBuildClick(name) {
-    let data = {
-      name: name,
-      primes: this.state.primes,
-      primes_inventory: this.state.primes_inventory,
-      parts_inventory: this.state.parts_inventory,
+    const data = buildBuildClickData(name, this.state);
+    // To keep the updateState method simple, we loop through the inventory
+    // changes here, as multiple inventory changes only happen in this method.
+    for (const p of data.primes_inventory) {
+      this.updateState("primes_inventory", p);
+    }
+    for (const p of data.parts_inventory) {
+      this.updateState("parts_inventory", p);
+    }
+    for (const d of data.desired) {
+      this.updateState("desired", d, {
+        shouldDelete: !d.is_desired,
+      });
     }
     this.restCalls.onBuildClick(data)
-    .then(this.checkForUpdatesOnChange)
+    .then(this.updateLastUpdatedMultiple.bind(this,["inventory","desired"]))
     .catch(error => console.error(error));
+  }
+
+  updateLastUpdated(target, response) {
+    const newLastUpdated = buildLastUpdated(
+      this.state.last_updated, response.data.last_updated);
+    const newState = Object.assign({}, this.state, newLastUpdated);
+    this.setState(newState);
+  }
+
+  updateLastUpdatedMultiple(targets, responses) {
+    for (const i in targets) {
+      this.updateLastUpdated(targets[i], responses[i]);
+    }
+  }
+
+  updateState(key, data, options) {
+    // Set default options.
+    options = Object.assign({
+      shouldDelete: false,
+    }, options);
+
+    let newState = Object.assign({}, this.state);
+
+    let foundExisting = false;
+    for (const i in newState[key]) {
+      // All of my states have a name property, so use that.
+      if (newState[key][i].name === data.name) {
+        foundExisting = true;
+        // The desired state should delete, not change a bool.
+        if (options.shouldDelete) {
+          newState[key].splice(i,1);
+        } else {
+          newState[key][i] = data;
+        }
+        break;
+      }
+    }
+    if (!foundExisting && !options.shouldDelete) {
+      newState[key].push(data);
+      // Need to sort after adding a new value.
+      // The data from the server is already sorted, but manually-modified
+      // state is not.
+      newState[key].sort((a,b) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+      });
+    }
+
+    this.setState(newState);
   }
 
   componentDidMount() {
