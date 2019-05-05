@@ -42,8 +42,20 @@ function rarityToLevel(rarity) {
   }
 }
 
+function buildLastUpdated(...states) {
+  let newLastUpdated = {'last_updated': {}};
+  for (const state of states) {
+    newLastUpdated['last_updated'] = Object.assign(
+      newLastUpdated['last_updated'],
+      state['last_updated']
+    );
+  }
+  return newLastUpdated;
+}
+
 export {
   findPrimeAndComponentFromPartName,
   findOwnedByName,
   rarityToLevel,
+  buildLastUpdated,
 }

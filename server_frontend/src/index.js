@@ -9,6 +9,8 @@ import { Wishlist } from './wishlist.js';
 import { Salables } from './salables.js';
 import { RelicRun } from './relicrun.js';
 
+import { buildLastUpdated } from './helpers.js';
+
 import './index.css';
 
 class WaRT extends React.Component {
@@ -25,16 +27,17 @@ class WaRT extends React.Component {
       "last_updated": {},
     };
 
-    this.refreshAllOnChange = this.refreshAllOnChange.bind(this);
     this.onCountChange = this.onCountChange.bind(this);
     this.onDesiredChange = this.onDesiredChange.bind(this);
     this.onBuildClick = this.onBuildClick.bind(this);
 
+    this.checkForUpdatesOnChange = this.checkForUpdatesOnChange.bind(this);
+
     this.restCalls = new RestCalls("http://localhost:50001");
   }
 
-  refreshAllOnChange(result) {
-    this.refreshAllREST();
+  checkForUpdatesOnChange(result) {
+    this.checkForUpdates();
   }
 
   refreshAllREST() {
@@ -50,10 +53,13 @@ class WaRT extends React.Component {
       last_updated: this.state.last_updated,
     }
     this.restCalls.checkForUpdates(data)
-    .then(updateNeeded => {
-      if (updateNeeded) {
-        this.refreshAllREST();
-      }
+    .then(newStateData => {
+      const lastUpdated = buildLastUpdated(this.state, newStateData);
+      const newState = Object.assign(
+        {}, this.state,
+        newStateData,
+        lastUpdated);
+      this.setState(newState);
     })
     .catch(error => console.error(error));
   }
@@ -66,11 +72,11 @@ class WaRT extends React.Component {
     }
     if (type === "prime") {
       this.restCalls.onPrimeCountChange(data)
-      .then(this.refreshAllOnChange)
+      .then(this.checkForUpdatesOnChange)
       .catch(error => console.error(error));
     } else {
       this.restCalls.onPartCountChange(data)
-      .then(this.refreshAllOnChange)
+      .then(this.checkForUpdatesOnChange)
       .catch(error => console.error(error));
     }
   }
@@ -82,7 +88,7 @@ class WaRT extends React.Component {
       is_desired: is_desired,
     };
     this.restCalls.onDesiredChange(data)
-    .then(this.refreshAllOnChange)
+    .then(this.checkForUpdatesOnChange)
     .catch(error => console.error(error));
   }
 
@@ -94,7 +100,7 @@ class WaRT extends React.Component {
       parts_inventory: this.state.parts_inventory,
     }
     this.restCalls.onBuildClick(data)
-    .then(this.refreshAllOnChange)
+    .then(this.checkForUpdatesOnChange)
     .catch(error => console.error(error));
   }
 
