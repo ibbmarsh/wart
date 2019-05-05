@@ -34,7 +34,7 @@ def get_collection_last_updated_max(
         compare_last_updated = datetime.utcfromtimestamp(0)
 
     query = {'last_updated': {'$exists': True}}
-    if user_id:
+    if user_id != None:
         query['user_id'] = user_id
 
     item = collection.find_one(query)
@@ -50,7 +50,7 @@ def set_collection_last_updated(collection, user_id=None, last_updated=None):
 
     query = {'last_updated': {'$exists': True}}
     data = {'last_updated': last_updated}
-    if user_id:
+    if user_id != None:
         query['user_id'] = user_id
         data['user_id'] = user_id
 
