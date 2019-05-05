@@ -234,7 +234,8 @@ body {
 }
 
 .relic-list .description {
-  height: 7em;
+  min-height: 6em;
+  padding-bottom: 1em;
 }
 
 .relic-list ul {
