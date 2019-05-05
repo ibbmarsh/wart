@@ -128,7 +128,7 @@ class WaRT extends React.Component {
 
   updateLastUpdated(target, response) {
     const newLastUpdated = buildLastUpdated(
-      this.state.last_updated, response.data.last_updated);
+      this.state, [response.data]);
     const newState = Object.assign({}, this.state, newLastUpdated);
     this.setState(newState);
   }
