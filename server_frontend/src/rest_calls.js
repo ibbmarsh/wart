@@ -98,7 +98,7 @@ class RestCalls {
     return axios.get(this.baseUrl+"/api/v1/user_preferences")
     .then(response => {
       return {
-        "user_preferences": response.data,
+        "user_preferences": response.data.user_preferences,
         "last_updated": {
           "user_preferences": response.data.last_updated
         },
@@ -132,6 +132,15 @@ class RestCalls {
         "uid": uid,
         "name": name,
         "is_desired": is_desired,
+      }]
+    });
+  }
+
+  onUserPrefChange({name, value}) {
+    return axios.put(this.baseUrl+"/api/v1/user_preferences", {
+      "user_preferences": [{
+        "name": name,
+        "value": value,
       }]
     });
   }

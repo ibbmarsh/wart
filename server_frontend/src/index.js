@@ -103,6 +103,21 @@ class WaRT extends React.Component {
   }
 
   /*
+   * Called whenever a user preference is changed.
+   * Updates the internal states and then uses RestCalls to update the server.
+   */
+  onUserPrefChange(name, value) {
+    const data = {
+      name: name,
+      value: value,
+    };
+    this.updateState("user_preferences", data);
+    this.restCalls.onUserPrefChange(data)
+    .then(this.updateLastUpdated.bind(this, "user_preferences"))
+    .catch(error => console.error(error));
+  }
+
+  /*
    * Called when the build button is clicked on the wishlist.
    * Updates the internal states and then uses RestCalls to update the server.
    */

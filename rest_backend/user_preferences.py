@@ -9,47 +9,41 @@ from rest_backend.db import (
 )
 
 class UserPreferences(Resource):
-    VALID_PREFERENCES = [
-    ]
-
-    def is_valid_preference(self, key):
-        if key not in self.VALID_PREFERENCES:
-            return False
-        return True
-
     def get(self):
         db = get_db()
         user_id = get_user_id()
 
         user_preferences_collection = db.get_collection('user_preferences')
-        user_preferences = user_preferences_collection.find_one(
-            {'user_id': user_id})
+        last_updated = get_collection_last_updated_max(
+            user_preferences_collection, user_id
+        )
+        user_preferences = []
+        for pref in user_preferences_collection.find({
+                'user_id': user_id,
+                'last_updated': {'$exists': False}}) \
+                .sort('name'):
+            del pref['_id']
+            del pref['user_id']
+            user_preferences.append(pref)
 
-        del user_preferences['_id']
-        del user_preferences['user_id']
-        user_preferences['last_updated'] = \
-            user_preferences['last_updated'].isoformat()
-
-        return user_preferences
+        return {
+            'last_updated': last_updated.isoformat(),
+            'user_preferences': user_preferences,
+        }
 
     def put(self):
         args = request.get_json(force=True)
         db = get_db()
         user_id = get_user_id()
 
-        user_preferences = {}
-        for k in args:
-            if self.is_valid_preference(k):
-                user_preferences[k] = args[k]
-        user_preferences['user_id'] = user_id
-        user_preferences['last_updated'] = None
-
         user_preferences_collection = db.get_collection('user_preferences')
-        user_preferences_collection.update_one(
-            {'user_id': user_id},
-            {'$set': user_preferences},
-            upsert=True
-        )
+        for pref in args.get('user_preferences', []):
+            pref['user_id'] = user_id
+            user_preferences_collection.update_one(
+                {'name': pref['name']},
+                {'$set': pref},
+                upsert=True
+            )
         last_updated = set_collection_last_updated(
             user_preferences_collection, user_id
         )
