@@ -100,10 +100,54 @@ function buildBuildClickData(name, state) {
   return data;
 }
 
+function gatherSpareParts(primes, primesInventory, partsInventory, desired) {
+  let spareParts = [];
+  for (const part of partsInventory) {
+    // We have 3 checks to perform:
+    // 1) Is the corresponding prime owned?
+    // 2) Is the corresponding prime desired?
+    // 3) Do we have more parts than needed?
+
+    // All 3 checks require finding the prime data first.
+    let [prime, component] =
+      findPrimeAndComponentFromPartName(part.name, primes);
+    if (prime === null) {
+      console.error("Failed to find prime corresponding to part %s",
+        part.name);
+      continue;
+    }
+
+    // 1) Check if the prime is owned.
+    let owned = findOwnedByName(prime.name, primesInventory) > 0;
+
+    // 2) Check if the prime is desired.
+    let isDesired = findOwnedByName(prime.name, desired) > 0;
+
+    // 3) Use the two previous checks to see if we need this part.
+    let needed = 0;
+    if (isDesired || !owned) {
+      needed = component.needed;
+    }
+
+    // 3) Only add it to the list if we have spare parts.
+    if (part.count > needed) {
+      spareParts.push({
+        part: part,
+        needed: needed,
+        ducats: component.ducats,
+      });
+    }
+  }
+
+  return spareParts;
+}
+
 export {
   findPrimeAndComponentFromPartName,
+  findItemByName,
   findOwnedByName,
   rarityToLevel,
   buildLastUpdated,
   buildBuildClickData,
+  gatherSpareParts,
 }

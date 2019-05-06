@@ -9,6 +9,7 @@ class WishlistRow extends React.Component {
   }
 
   handleDesiredChange(e) {
+    // Immediately set local state so user can freely edit.
     this.setState({"desired":e.target.checked});
     this.props.onDesiredChange(
       this.props.prime.name,
@@ -22,6 +23,7 @@ class WishlistRow extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    // If our world state now matches our local state, delete local state.
     if (this.state.desired !== undefined
       && this.state.desired === nextProps.prime.desired)
     {

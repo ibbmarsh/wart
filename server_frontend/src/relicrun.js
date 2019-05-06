@@ -1,8 +1,11 @@
 import React from 'react';
 
+import { DucatsBar } from './ducats_bar.js';
+
 import {
   findOwnedByName,
   rarityToLevel,
+  gatherSpareParts,
 } from './helpers.js';
 
 class RewardRow extends React.Component {
@@ -395,8 +398,21 @@ class RelicRun extends React.Component {
       }
     }
 
+    // Gather spare parts for DucatsBar.
+    const spareParts = gatherSpareParts(
+      this.props.primes,
+      this.props.primesInventory,
+      this.props.partsInventory,
+      this.props.desired
+    );
+
     return (
       <div className="relicrun-panes">
+        <DucatsBar
+          spareParts={spareParts}
+          userPreferences={this.props.userPreferences}
+          onUserPrefChange={this.props.onUserPrefChange}
+        />
         <RelicRunner
           relics={this.props.relics}
           era={this.state.era}

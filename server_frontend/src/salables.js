@@ -1,8 +1,10 @@
 import React from 'react';
 
+import { DucatsBar } from './ducats_bar.js';
+
 import {
-  findPrimeAndComponentFromPartName,
-  findOwnedByName,
+  findItemByName,
+  gatherSpareParts,
 } from './helpers.js';
 
 class SalablesRow extends React.Component {
@@ -22,6 +24,20 @@ class SalablesRow extends React.Component {
   }
 
   handleDucatClicked(e) {
+    // Find the current amount of ducats.
+    let ducatsOwned = 0;
+    const ducatsOwnedPref = findItemByName("ducats_owned",
+      this.props.userPreferences);
+    if (ducatsOwnedPref !== null) {
+      ducatsOwned = ducatsOwnedPref.value;
+    }
+
+    // Increment by the amount this sale would get us.
+    ducatsOwned +=
+      (this.props.part.count - this.props.needed) * this.props.ducats;
+
+    // Send the state updates.
+    this.props.onUserPrefChange("ducats_owned", ducatsOwned);
     this.sellPart();
   }
 
@@ -57,50 +73,34 @@ class SalablesRow extends React.Component {
 
 class Salables extends React.Component {
   render() {
+    const spareParts = gatherSpareParts(
+      this.props.primes,
+      this.props.primesInventory,
+      this.props.partsInventory,
+      this.props.desired
+    );
     let salables = [];
-    for (const part of this.props.partsInventory) {
-      // We have 3 checks to perform:
-      // 1) Is the corresponding prime owned?
-      // 2) Is the corresponding prime desired?
-      // 3) Do we have more parts than needed?
-
-      // All 3 checks require finding the prime data first.
-      let [prime, component] =
-        findPrimeAndComponentFromPartName(part.name, this.props.primes);
-      if (prime === null) {
-        console.error("Failed to find prime corresponding to part %s",
-          part.name);
-        continue;
-      }
-
-      // 1) Check if the prime is owned.
-      let owned = findOwnedByName(prime.name, this.props.primesInventory) > 0;
-
-      // 2) Check if the prime is desired.
-      let desired = findOwnedByName(prime.name, this.props.desired) > 0;
-
-      // 3) Use the two previous checks to see if we need this part.
-      let needed = 0;
-      if (desired || !owned) {
-        needed = component.needed;
-      }
-
-      // 3) Only add it to the salables if we have spare parts.
-      if (part.count > needed) {
-        salables.push(
-          <SalablesRow
-            key={part.name+" row"}
-            part={part}
-            needed={needed}
-            ducats={component.ducats}
-            onCountChange={this.props.onCountChange}
-          />
-        );
-      }
+    for (const spare of spareParts) {
+      salables.push(
+        <SalablesRow
+          key={spare.part.name+" row"}
+          part={spare.part}
+          needed={spare.needed}
+          ducats={spare.ducats}
+          onCountChange={this.props.onCountChange}
+          userPreferences={this.props.userPreferences}
+          onUserPrefChange={this.props.onUserPrefChange}
+        />
+      );
     }
 
     return (
       <div className="salables-list">
+        <DucatsBar
+          spareParts={spareParts}
+          userPreferences={this.props.userPreferences}
+          onUserPrefChange={this.props.onUserPrefChange}
+        />
         <div className="description">
           Below is a list of all the excess prime parts in your inventory.
           You are free to sell any of them for ducats or plat.

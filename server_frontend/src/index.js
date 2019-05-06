@@ -26,12 +26,13 @@ class WaRT extends React.Component {
       "primes_inventory": [],
       "parts_inventory": [],
       "desired": [],
-      "user_preferences": {},
+      "user_preferences": [],
       "last_updated": {},
     };
 
     this.onCountChange = this.onCountChange.bind(this);
     this.onDesiredChange = this.onDesiredChange.bind(this);
+    this.onUserPrefChange = this.onUserPrefChange.bind(this);
     this.onBuildClick = this.onBuildClick.bind(this);
 
     this.restCalls = new RestCalls("http://localhost:50001");
@@ -209,7 +210,7 @@ class WaRT extends React.Component {
 
   render() {
     return (
-      <Tabs>
+      <Tabs defaultIndex={3}>
         <TabList>
           <Tab><div className="logo"><span className="logo-spiffy">Wa</span>rframe <span className="logo-spiffy">R</span>elic <span className="logo-spiffy">T</span>racker</div></Tab>
           <Tab>Inventory</Tab>
@@ -244,7 +245,9 @@ class WaRT extends React.Component {
             primesInventory={this.state.primes_inventory}
             partsInventory={this.state.parts_inventory}
             desired={this.state.desired}
+            userPreferences={this.state.user_preferences}
             onCountChange={this.onCountChange}
+            onUserPrefChange={this.onUserPrefChange}
           />
         </TabPanel>
         <TabPanel>
@@ -254,7 +257,9 @@ class WaRT extends React.Component {
             primesInventory={this.state.primes_inventory}
             partsInventory={this.state.parts_inventory}
             desired={this.state.desired}
+            userPreferences={this.state.user_preferences}
             onCountChange={this.onCountChange}
+            onUserPrefChange={this.onUserPrefChange}
           />
         </TabPanel>
       </Tabs>
