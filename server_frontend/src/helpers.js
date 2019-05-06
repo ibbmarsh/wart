@@ -76,7 +76,6 @@ function buildBuildClickData(name, state) {
   // for the prime and each part.
   const count = findOwnedByName(name, state.primes_inventory);
   data.primes_inventory.push({
-    "uid": prime.uid,
     "name": name,
     "count": count+1,
   });
@@ -84,7 +83,6 @@ function buildBuildClickData(name, state) {
   for (const c of prime.components) {
     const count = findOwnedByName(c.name, state.parts_inventory);
     data.parts_inventory.push({
-      "uid": c.uid,
       "name": c.name,
       "count": count-c.needed,
     });
@@ -92,7 +90,6 @@ function buildBuildClickData(name, state) {
 
   // Finally, the desired payload.
   data.desired.push({
-    "uid": prime.uid,
     "name": name,
     "is_desired": false,
   });

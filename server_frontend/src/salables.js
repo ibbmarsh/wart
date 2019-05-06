@@ -18,7 +18,6 @@ class SalablesRow extends React.Component {
     this.props.onCountChange(
       "part",
       this.props.part.name,
-      this.props.part.uid,
       this.props.needed
     );
   }

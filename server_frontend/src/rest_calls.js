@@ -106,30 +106,27 @@ class RestCalls {
     });
   }
 
-  onPrimeCountChange({uid, name, count}) {
+  onPrimeCountChange({name, count}) {
     return axios.put(this.baseUrl+"/api/v1/inventory", {
       "primes_inventory": [{
-        "uid": uid,
         "name": name,
         "count": count,
       }]
     });
   }
 
-  onPartCountChange({uid, name, count}) {
+  onPartCountChange({name, count}) {
     return axios.put(this.baseUrl+"/api/v1/inventory", {
       "parts_inventory": [{
-        "uid": uid,
         "name": name,
         "count": count,
       }]
     });
   }
 
-  onDesiredChange({uid, name, is_desired}) {
+  onDesiredChange({name, is_desired}) {
     return axios.put(this.baseUrl+"/api/v1/desired", {
       "desired": [{
-        "uid": uid,
         "name": name,
         "is_desired": is_desired,
       }]

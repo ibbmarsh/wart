@@ -66,9 +66,8 @@ class WaRT extends React.Component {
    * Called when an inventory count is updated from somewhere.
    * Updates the internal state and then uses RestCalls to update the server.
    */
-  onCountChange(type, name, uid, count) {
+  onCountChange(type, name, count) {
     const data = {
-      uid: uid,
       name: name,
       count: count,
     };
@@ -89,9 +88,8 @@ class WaRT extends React.Component {
    * Called when a wishlist item is updated from somewhere.
    * Updates the internal state and then uses RestCalls to update the server.
    */
-  onDesiredChange(name, uid, is_desired) {
+  onDesiredChange(name, is_desired) {
     const data = {
-      uid: uid,
       name: name,
       is_desired: is_desired,
     };

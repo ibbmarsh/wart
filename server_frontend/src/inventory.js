@@ -14,7 +14,6 @@ class PrimeItem extends React.Component {
       this.props.onCountChange(
         this.props.type,
         this.props.datakey,
-        this.props.item.uid,
         parseInt(newValue)
       );
     }
@@ -103,7 +102,6 @@ class Inventory extends React.Component {
     for (const p of this.props.primes) {
       let prime = {
         "name": p.name,
-        "uid": p.uid,
         "count": 0
       };
       // Get the count of prime itself.
@@ -118,7 +116,6 @@ class Inventory extends React.Component {
       for (const pi of p.components) {
         let part = {
           "name": pi.name,
-          "uid": pi.uid,
           "needed": pi.needed,
           "count": 0
         };

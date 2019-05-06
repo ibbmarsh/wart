@@ -13,7 +13,6 @@ class WishlistRow extends React.Component {
     this.setState({"desired":e.target.checked});
     this.props.onDesiredChange(
       this.props.prime.name,
-      this.props.prime.uid,
       e.target.checked
     );
   }
@@ -82,7 +81,6 @@ class Wishlist extends React.Component {
     for (const p of this.props.primes) {
       let prime = {
         "name": p.name,
-        "uid": p.uid,
         "desired": false,
         "buildable": this.primeIsBuildable(p,this.props.partsInventory),
       };

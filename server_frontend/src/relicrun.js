@@ -18,7 +18,6 @@ class RewardRow extends React.Component {
     // Add the reward to our inventory.
     this.props.onCountChange("part",
       this.props.reward.name,
-      this.props.reward.uid,
       this.props.reward.ownedCount+1
     );
     // Reset the code dropdowns.
@@ -199,7 +198,6 @@ class RelicRunner extends React.Component {
               ));
               rewardsList.push({
                 "name": reward.name,
-                "uid": reward.uid,
                 "rarity": reward.rarity,
                 "rarityLevel": rarityToLevel(reward.rarity),
                 "ducats": partData.ducats,

@@ -186,7 +186,6 @@ function buildPrimeData(newData) {
     // We only want to know about prime parts.
     if (isPrimePartData(dataComponent)) {
       let myComponent = {
-        "uid": dataComponent.uniqueName,
         "name": adjustComponentName(newData,dataComponent),
         "needed": dataComponent.itemCount,
         "ducats": dataComponent.ducats,
@@ -215,7 +214,6 @@ function buildPrimeData(newData) {
   // data is fairly easy to build.
   return {
     "name": newData.name,
-    "uid": newData.uniqueName,
     "vaulted": newData.vaulted,
     "components": components,
   };
@@ -280,7 +278,6 @@ function buildRelicData(newData, wfcdData) {
         // component to the relics rewards.
         if (drop.location == relicName) {
           let reward = {
-            "uid": component.uniqueName,
             "name": adjustComponentName(prime,component),
             "rarity": chanceToRarity[drop.chance],
             "ducats": component.ducats,

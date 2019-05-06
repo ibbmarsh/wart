@@ -38,7 +38,6 @@ class Desired(Resource):
         desired_collection = db.get_collection('desired')
         for prime in args.get('desired', []):
             name = prime['name']
-            uid = prime['uid']
             is_desired = prime['is_desired']
             if is_desired:
                 desired_collection.update_one(
@@ -46,7 +45,6 @@ class Desired(Resource):
                     {'$set': {
                         'name': name,
                         'user_id': user_id,
-                        'uid': uid,
                     }},
                     upsert=True
                 )
