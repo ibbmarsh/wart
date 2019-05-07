@@ -216,7 +216,7 @@ class WaRT extends React.Component {
 
   render() {
     return (
-      <Tabs defaultIndex={3}>
+      <Tabs>
         <TabList>
           <Tab><div className="logo"><span className="logo-spiffy">Wa</span>rframe <span className="logo-spiffy">R</span>elic <span className="logo-spiffy">T</span>racker</div></Tab>
           <Tab>Inventory</Tab>

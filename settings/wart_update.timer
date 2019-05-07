@@ -1,0 +1,10 @@
+[Unit]
+Description=Runs WaRT data update daily at midnight
+Requires=wart_update.service
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

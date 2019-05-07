@@ -1,0 +1,12 @@
+[Unit]
+Description=WaRT data update
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/wart
+ExecStart=docker-compose -f docker-compose.yml -f docker-compose.prod.yml run --rm data_gatherer
+
+[Install]
+WantedBy=multi-user.target
