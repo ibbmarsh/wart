@@ -35,7 +35,15 @@ class WaRT extends React.Component {
     this.onUserPrefChange = this.onUserPrefChange.bind(this);
     this.onBuildClick = this.onBuildClick.bind(this);
 
-    this.restCalls = new RestCalls("http://localhost:50001");
+    if (window.server_env === "development") {
+      this.restCalls = new RestCalls("http://localhost:50001");
+    } else if (window.server_env === "staging") {
+      this.restCalls = new RestCalls("https://staging.wart.ibbmarsh.com");
+    } else if (window.server_env === "production") {
+      this.restCalls = new RestCalls("https://wart.ibbmarsh.com");
+    } else {
+      throw new Error("NODE_ENV was not set on server. Contact administrator to fix this.");
+    }
   }
 
   refreshAllREST() {

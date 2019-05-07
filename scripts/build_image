@@ -1,0 +1,28 @@
+#!/usr/bin/bash
+
+if [ "$#" -lt 2 ]; then
+  echo "Usage: build_image <service> <version>"
+  echo "Example: build_image rest_backend 0.2"
+  exit 1
+fi
+
+if [[ \
+      "$1" != "rest_backend" \
+   && "$1" != "server_frontend" \
+   && "$1" != "data_gatherer" \
+   ]]; then
+  echo "Invalid service ${1}"
+  echo "service must be one of the following:"
+  echo "  rest_backend"
+  echo "  server_frontend"
+  echo "  data_gatherer"
+  exit 1
+fi
+
+SPACETEST=$'[ \'\t]'
+if [[ $2 =~ $SPACETEST ]]; then
+  echo "Invalid version ${2}"
+  echo "version cannot have spaces in it"
+fi
+
+docker build ${1} -t ibbathon/wart_${1}:${2} -t ibbathon/wart_${1}

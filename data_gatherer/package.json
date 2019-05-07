@@ -5,10 +5,9 @@
   "author": "Ibb Marsh <ibb@ibbmarsh.com>",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "npm update warframe-items --no-save && node index.js"
   },
   "dependencies": {
-    "express": "^4.16.1",
     "warframe-items": "latest",
     "mongodb": "^3.2.3",
     "deep-equal": "^1.0.1"

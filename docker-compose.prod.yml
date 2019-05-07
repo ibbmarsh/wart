@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+
+  data_gatherer:
+    image: ibbathon/wart_data_gatherer
+    environment:
+      NODE_ENV: production
+    working_dir: /data_gatherer
+
+  rest_backend:
+    image: ibbathon/wart_rest_backend
+    environment:
+      FLASK_ENV: production
+      FLASK_SECRET: blah
+    ports:
+      - "50001:80"
+    working_dir: /rest_backend
+
+  server_frontend:
+    image: ibbathon/wart_server_frontend
+    environment:
+      NODE_ENV: production
+    ports:
+      - "50002:5000"
+    working_dir: /server_frontend

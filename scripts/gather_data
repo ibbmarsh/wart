@@ -1,6 +1,0 @@
-#!/bin/bash
-
-echo "********** Updating warframe-items **********"
-docker-compose run data_gatherer npm update warframe-items
-echo "********** Loading data into Mongo **********"
-docker-compose up data_gatherer

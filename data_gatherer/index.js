@@ -352,7 +352,7 @@ async function updateLastUpdated(db, counter) {
 
   return Promise.resolve(true)
   .then((result) => {
-    if (counter.primesInserted > 0 || counter.primesUpdated) {
+    if (counter.primesInserted > 0 || counter.primesUpdated > 0) {
       return db.collection(primesCollection)
              .updateOne(
                {'last_updated': {$exists: true}},
@@ -364,7 +364,7 @@ async function updateLastUpdated(db, counter) {
     }
   })
   .then((result) => {
-    if (counter.relicsInserted > 0 || counter.relicsUpdated) {
+    if (counter.relicsInserted > 0 || counter.relicsUpdated > 0) {
       return db.collection(relicsCollection)
              .updateOne(
                {'last_updated': {$exists: true}},

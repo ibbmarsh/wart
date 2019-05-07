@@ -1,0 +1,54 @@
+version: '3'
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+  data_gatherer_node_modules:
+  rest_backend_pip_modules:
+  server_frontend_node_modules:
+
+services:
+
+  data_gatherer:
+    image: node:8
+    depends_on:
+      - mongo
+    volumes:
+      - ./data_gatherer:/data_gatherer
+      - data_gatherer_node_modules:/data_gatherer/node_modules
+    working_dir: /data_gatherer
+    command: npm run start
+
+  rest_backend:
+    image: python:3.7
+    depends_on:
+      - mongo
+    environment:
+      PYTHONUSERBASE: /rest_backend_pip_modules
+      FLASK_ENV: development
+      FLASK_APP: /rest_backend
+    volumes:
+      - ./rest_backend:/rest_backend
+      - rest_backend_pip_modules:/rest_backend_pip_modules
+    working_dir: /rest_backend
+    ports:
+      - "50001:5000"
+    command: python -m flask run --host=0.0.0.0
+
+  mongo:
+    ports:
+      - "50017:27017"
+
+  server_frontend:
+    image: node:8
+    depends_on:
+      - rest_backend
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./server_frontend:/server_frontend
+      - server_frontend_node_modules:/server_frontend/node_modules
+    working_dir: /server_frontend
+    ports:
+      - "50002:3000"
+    command: npm start

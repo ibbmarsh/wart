@@ -10,10 +10,12 @@ def create_app(test_config=None):
     if app.config['ENV'] == 'development':
         CORS(app)
     elif app.config['ENV'] == 'staging':
-        CORS(app, origins=["staging.wart.ibbathon.com",
-            "staging.wart.ibbmarsh.com"])
+        CORS(app, origins=[
+            "staging.wart.ibbathon.com", "staging.wart.ibbmarsh.com"])
     elif app.config['ENV'] == 'production':
         CORS(app, origins=["wart.ibbathon.com","wart.ibbmarsh.com"])
+        # TODO: remove the following line if it works on server with above
+        #CORS(app, resources={r'/api/*': {'origins'= '*'}})
 
     app.config.from_mapping(
         SECRET_KEY='dev',
