@@ -6,16 +6,11 @@ from flask_cors import CORS
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
 
-    # Set up CORS, allowing every origin in development mode
+    # Set up CORS, allowing different ports in development mode
     if app.config['ENV'] == 'development':
         CORS(app)
-    elif app.config['ENV'] == 'staging':
-        CORS(app, origins=[
-            "staging.wart.ibbathon.com", "staging.wart.ibbmarsh.com"])
-    elif app.config['ENV'] == 'production':
-        CORS(app, origins=["wart.ibbathon.com","wart.ibbmarsh.com"])
-        # TODO: remove the following line if it works on server with above
-        #CORS(app, resources={r'/api/*': {'origins'= '*'}})
+    # TODO: maybe also use CORS for staging/production in case we want
+    #       the REST API to run on a different domain.
 
     app.config.from_mapping(
         SECRET_KEY='dev',
