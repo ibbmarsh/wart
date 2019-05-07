@@ -30,6 +30,7 @@ def create_app(test_config=None):
     from . import db, universal, inventory, desired, user_preferences, \
         last_updated, auth
     db.init_app(app)
+    app.register_blueprint(auth.bp)
     app.register_blueprint(universal.bp)
     app.register_blueprint(inventory.bp)
     app.register_blueprint(desired.bp)

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import Cookies from 'universal-cookie';
 
 import { RestCalls } from './rest_calls.js';
 import { About } from './about.js';
@@ -30,6 +31,7 @@ class WaRT extends React.Component {
       "last_updated": {},
     };
 
+    this.onLogin = this.onLogin.bind(this);
     this.onCountChange = this.onCountChange.bind(this);
     this.onDesiredChange = this.onDesiredChange.bind(this);
     this.onUserPrefChange = this.onUserPrefChange.bind(this);
@@ -66,6 +68,21 @@ class WaRT extends React.Component {
         newStateData,
         lastUpdated);
       this.setState(newState);
+    })
+    .catch(error => console.error(error));
+  }
+
+  /*
+   * Called when the user clicks login.
+   */
+  onLogin(username) {
+    this.restCalls.login(username)
+    .then(response => {
+      const cookies = new Cookies();
+      cookies.set("auth-token",response.data.token);
+      cookies.set("username",response.data.username);
+      // We're logged in, so fill in the data.
+      this.gatherDataAndStartUpdater();
     })
     .catch(error => console.error(error));
   }
@@ -199,12 +216,31 @@ class WaRT extends React.Component {
   }
 
   componentDidMount() {
+    // Check if we have an existing session.
+    this.restCalls.checkToken()
+    .then(response => {
+      // If so, fill in the data.
+      this.gatherDataAndStartUpdater();
+    })
+    .catch(error => {
+      // Cookies are invalid, so get rid of them.
+      const cookies = new Cookies();
+      cookies.remove("username");
+      cookies.remove("auth-token");
+    });
+  }
+
+  gatherDataAndStartUpdater() {
     this.refreshAllREST();
 
     // Set up a periodic check for updates
+    let checkInterval = 60000; // 1 minute for prod/staging
+    if (window.server_env === "development") {
+      checkInterval = 10000; // 10 seconds for development
+    }
     const checkIntervalID = setInterval(
       () => {this.checkForUpdates()},
-      10000
+      checkInterval
     );
     const newState = Object.assign(
       {},
@@ -226,7 +262,9 @@ class WaRT extends React.Component {
         </TabList>
 
         <TabPanel>
-          <About />
+          <About
+            onLogin={this.onLogin}
+          />
         </TabPanel>
         <TabPanel>
           <Inventory

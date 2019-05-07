@@ -1,7 +1,7 @@
 from flask_restful import Resource, Api
 from flask import Blueprint, request
 
-from rest_backend.auth import get_user_id
+from rest_backend.auth import get_user_id, login_required
 from rest_backend.db import (
     get_db,
     get_collection_last_updated_max,
@@ -9,6 +9,8 @@ from rest_backend.db import (
 )
 
 class Desired(Resource):
+    method_decorators = [login_required]
+
     def get(self):
         db = get_db()
         user_id = get_user_id()

@@ -7,11 +7,14 @@ from rest_backend.db import (
     get_db,
     get_collection_last_updated_max
 )
+from rest_backend.auth import login_required
 
 bp = Blueprint('universal', __name__)
 api = Api(bp)
 
 class Universal(Resource):
+    method_decorators = [login_required]
+
     def get(self):
         db = get_db()
 
