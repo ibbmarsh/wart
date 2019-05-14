@@ -38,6 +38,29 @@ const chanceToRarity = {
   0.11: 'uncommon',
   0.02: 'rare',
 }
+const vaultOverride = {
+  // This allows me to override the vaulted state of certain primes and relics.
+  // This is necessary because WFCD occasionally has bad data.
+  'primes': {
+  },
+  'relics': {
+    'Lith O2': false,
+    'Meso O3': false,
+    'Neo V8': false,
+    'Axi L4': false,
+  }
+}
+const relicListOverride = {
+  // This allows me to override the list of relics from which the component
+  // can drop. Rarity is included so the relic builder can use this too.
+  // Frickin Kavasa Prime Collar is the reason again.
+  'Kavasa Prime Collar Band': ['uncommon',[
+    'Lith C1', 'Lith N2', 'Lith S2', 'Lith S6', 'Meso V3']],
+  'Kavasa Prime Collar Buckle': ['rare',[
+    'Lith K1', 'Neo S6', 'Axi B1', 'Axi K1']],
+  'Kavasa Prime Collar Blueprint': ['uncommon',[
+    'Lith S4', 'Neo N1', 'Axi G1']],
+}
 
 function driver() {
   // Set up Mongo connection
@@ -89,28 +112,38 @@ function driver() {
       }
     }
 
-    // Resolve all promises before closing the connection and outputting stats
+    // Resolve all promises to finish initial processing.
     Promise.all(promises)
-    .then((result) => {
-      // Now that we have resolved all promises, we can check if there have
-      // been any updates or inserts. If so, update the special last_updated
-      // object with today's datetime.
-      updateLastUpdated(db, counter)
-      .then((result) => {
-        client.close();
+    .then(result => {
+      console.log("Finished data population");
+      // Now that the initial processing is complete, populate prime vaulted
+      // status from relic vaulted status. This is necessary because
+      // "unvaulted" primes still show as vaulted, and also because WFCD's
+      // data on prime vaulted status is occasionally incorrect, but relic
+      // vaulted status is usually correct.
+      return correctPrimeVaultedStatus(db, counter);
+    })
+    .then(result => {
+      console.log("Finished vault status correction");
+      // Prime/relic data is committed. Update last_updated for each.
+      return updateLastUpdated(db, counter);
+    })
+    .then(result => {
+      console.log("Finished last updated");
+      // Finally, we can close our Mongo connection and output stats.
+      client.close();
 
-        console.log("Inserted/Updated/Errored/File");
-        console.log("Primes: "
-          +counter.primesInserted+"/"
-          +counter.primesUpdated+"/"
-          +counter.primesErrored+"/"
-          +counter.primes);
-        console.log("Relics: "
-          +counter.relicsInserted+"/"
-          +counter.relicsUpdated+"/"
-          +counter.relicsErrored+"/"
-          +counter.relics);
-      });
+      console.log("Inserted/Updated/Errored/File");
+      console.log("Primes: "
+        +counter.primesInserted+"/"
+        +counter.primesUpdated+"/"
+        +counter.primesErrored+"/"
+        +counter.primes);
+      console.log("Relics: "
+        +counter.relicsInserted+"/"
+        +counter.relicsUpdated+"/"
+        +counter.relicsErrored+"/"
+        +counter.relics);
     });
   });
 }
@@ -134,14 +167,13 @@ function isRelicData(data) {
   )
 }
 
-function isPrimePartData(data) {
+function isPrimePartData(primeName, data) {
   return (
     // We're only interested in drops which can be traded for ducats, as
     // non-prime-part components will not have that quality.
     "ducats" in data
     // Except for the Kavasa collar, for some bizarre reason.
-    || data.name == "Kavasa Prime Band"
-    || data.name == "Kavasa Prime Buckle"
+    || primeName === "Kavasa Prime Kubrow Collar"
   );
 }
 
@@ -184,7 +216,7 @@ function buildPrimeData(newData) {
   for (let i in newData.components) {
     let dataComponent = newData.components[i];
     // We only want to know about prime parts.
-    if (isPrimePartData(dataComponent)) {
+    if (isPrimePartData(newData.name, dataComponent)) {
       let myComponent = {
         "name": adjustComponentName(newData,dataComponent),
         "needed": dataComponent.itemCount,
@@ -197,6 +229,10 @@ function buildPrimeData(newData) {
         if (drop.location.match(/Intact$/)) {
           myComponent.relics.push(drop.location.replace(" Intact",""));
         }
+      }
+      // If we want to override the relic list, do so.
+      if (myComponent.name in relicListOverride) {
+        myComponent.relics = relicListOverride[myComponent.name][1];
       }
       // We've built our version of the component, push it.
       components.push(myComponent);
@@ -212,9 +248,13 @@ function buildPrimeData(newData) {
 
   // Now that the annoyance of components is dealt with, the actual
   // data is fairly easy to build.
+  let vaulted = newData.vaulted;
+  if (newData.name in vaultOverride.primes) {
+    vaulted = vaultOverride.primes[newData.name];
+  }
   return {
     "name": newData.name,
-    "vaulted": newData.vaulted,
+    "vaulted": vaulted,
     "components": components,
   };
 }
@@ -268,7 +308,7 @@ function buildRelicData(newData, wfcdData) {
     for (let j in prime.components) {
       let component = prime.components[j];
       // If it's not a prime part, skip.
-      if (!isPrimePartData(component)) {
+      if (!isPrimePartData(prime.name, component)) {
         continue;
       }
       // Now run through the drops.
@@ -288,19 +328,38 @@ function buildRelicData(newData, wfcdData) {
     }
   }
 
+  // Parse the name into its parts.
+  const i1 = relicName.indexOf(" ");
+  const i2 = relicName.indexOf(" Intact");
+  const name = relicName.slice(0,i2);
+  const era = relicName.slice(0,i1);
+  const code = relicName.slice(i1+1,i2);
+
+  // Run through relic list overrides, as they obviously don't
+  // appear in the normal WFCD data.
+  for (const componentName in relicListOverride) {
+    if (relicListOverride[componentName][1].indexOf(name) !== -1) {
+      const reward = {
+        "name": componentName,
+        "rarity": relicListOverride[componentName][0],
+        "ducats": 0,
+      };
+      rewards.push(reward);
+    }
+  }
+
   // Now that we have pre-processing finished, the data is simple to build.
-  let i1 = relicName.indexOf(" ");
-  let i2 = relicName.indexOf(" Intact");
-  let name = relicName.slice(0,i2);
-  let era = relicName.slice(0,i1);
-  let code = relicName.slice(i1+1,i2);
+  let vaulted = !("drops" in newData);
+  if (name in vaultOverride.relics) {
+    vaulted = vaultOverride.relics[name];
+  }
   return {
-    "name": relicName.slice(0,i2),
-    "era": relicName.slice(0,i1),
+    "name": name,
+    "era": era,
     "era_num": eraToNum(era),
     "code": code,
     "code_padded": padCode(code),
-    "vaulted": !("drops" in newData),
+    "vaulted": vaulted,
     "rewards": rewards,
   };
 }
@@ -314,12 +373,20 @@ async function insertDataInDB(db, collection, builtData) {
 async function updateDataInDB(db, collection, builtData, oldData) {
   // Use the id of the existing data, so we overwrite it.
   builtData._id = oldData._id;
+  // For primes, copy the vaulted status of the existing data temporarily,
+  // so that we don't count changes to it as updates (until later, when we
+  // correct vaulted status).
+  let vaulted = builtData.vaulted;
+  if (collection === primesCollection && !(builtData.name in vaultOverride)) {
+    builtData.vaulted = oldData.vaulted;
+  };
 
   if (deepEqual(builtData, oldData)) {
     // They're equal, so just return an empty result.
     return Promise.resolve({});
   } else {
-    // Otherwise, update
+    // Otherwise, update, making sure to set vaulted status back first.
+    builtData.vaulted = vaulted;
     return db.collection(collection)
            .updateOne({"name": builtData.name},{$set: builtData});
   }
@@ -331,13 +398,16 @@ function adjustComponentName(prime, component) {
   // the name of the prime on the front.
   // There are only a few exceptions to this issue, and they can be handled
   // by looking for the word Prime in the component name.
-  if (component.name.match(/Prime/)) {
+  if (component.name.match(/Prime/) || prime.name.match(/Kavasa Prime/)) {
     // The special case of the Kavasa Prime collar. For some reason,
     // the API returns them as "Kavasa Prime [name]" instead of
     // "Kavasa Prime Collar [name]". We need the latter in order for the
     // interface to look nice.
     if (component.name.match(/Kavasa Prime/)) {
       return component.name.replace(/Kavasa Prime/, "Kavasa Prime Collar");
+    } else if (prime.name.match(/Kavasa Prime/)) {
+      // The extra special case of the Kavasa Prime collar blueprint.
+      return "Kavasa Prime Collar Blueprint";
     }
 
     return component.name;
@@ -375,6 +445,64 @@ async function updateLastUpdated(db, counter) {
       return Promise.resolve(true)
     }
   });
+}
+
+/*
+ * Fixes vaulted status of primes, based on vaulted status of relics.
+ * Note that we may end up double-counting prime updates in the counter,
+ * as we have no way of knowing if the non-vault prime data was also updated.
+ * TODO: Make a better counter which tracks which primes are updated.
+ */
+async function correctPrimeVaultedStatus(db, counter) {
+  const cursor = db.collection(primesCollection).find({name:{$exists:true}});
+  let promises = [];
+  let prime;
+  while (prime = await cursor.next()) {
+    promises.push(correctOnePrimeVaultedStatus(db, counter, prime));
+  }
+  return Promise.all(promises);
+}
+
+async function correctOnePrimeVaultedStatus(db, counter, prime) {
+  // Default is unvaulted, only vaulted if any components vaulted.
+  let shouldBeVaulted = false;
+  for (const component of prime.components) {
+    // Default for components is vaulted, only unvaulted if any relic
+    // is unvaulted.
+    let componentVaulted = true;
+    for (const relic of component.relics) {
+      await db.collection(relicsCollection).findOne({name: relic})
+      .then(result => {
+        if (result !== null && !result.vaulted) {
+          componentVaulted = false;
+        }
+      });
+      if (!componentVaulted) {
+        break;
+      }
+    }
+    if (componentVaulted) {
+      shouldBeVaulted = true;
+      break;
+    }
+  }
+
+  // We've determined whether the prime *should* be vaulted. Now check
+  // the actual status and update data if necessary.
+  if (prime.vaulted !== shouldBeVaulted
+      && !(prime.name in vaultOverride)
+  ) {
+    return db.collection(primesCollection).updateOne(
+      {name: prime.name},
+      {$set: {vaulted: shouldBeVaulted}}
+    )
+    .then(result => {
+      counter.primesUpdated += 1;
+      return true;
+    });
+  } else {
+    return Promise.resolve(false);
+  }
 }
 
 function eraToNum(era) {
