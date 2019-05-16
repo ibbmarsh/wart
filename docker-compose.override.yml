@@ -23,10 +23,12 @@ services:
     image: python:3.7
     depends_on:
       - mongo
+    env_file: dev.env
     environment:
       PYTHONUSERBASE: /rest_backend_pip_modules
       FLASK_ENV: development
       FLASK_APP: /rest_backend
+      FLASK_SECRET: dev
     volumes:
       - ./rest_backend:/rest_backend
       - rest_backend_pip_modules:/rest_backend_pip_modules
@@ -43,6 +45,7 @@ services:
     image: node:8
     depends_on:
       - rest_backend
+    env_file: dev.env
     environment:
       NODE_ENV: development
     volumes:

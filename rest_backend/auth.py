@@ -1,8 +1,11 @@
 import sys
 import json
+import jwt
 from functools import wraps
-from flask import g, request, Blueprint
+from flask import g, current_app, request, Blueprint
 from flask_restful import abort, Resource, Api
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
 
 from rest_backend.db import get_db
 
@@ -20,48 +23,70 @@ def get_user_id():
 
 def check_authenticated():
     g.user = None
-    auth_data = decode_auth_header(request.headers.get('Authorization'))
-    if valid_wart_token(auth_data):
+    auth_data = validate_wart_token(request.headers.get('Authorization'))
+    try:
         g.user = auth_data['user']
         return True
-    return False
+    except:
+        return False
 
-def decode_auth_header(auth_header):
+def validate_wart_token(auth_header):
     # TODO: Have it actually decode the auth header somehow, such as JWT.
     try:
         auth_header = json.loads(auth_header)
-        if 'user' in auth_header:
-            return {'username': auth_header['username'],
-                    'user': auth_header['user']}
+        return {'user': auth_header['user']}
     except:
-        pass
-    return {}
-
-def valid_wart_token(auth_data):
-    return 'user' in auth_data
+        return {}
 
 def validate_simple_auth_token(token):
     """'Decodes' a token which is just the username. This is purely so I can
     test locally in an easy way. It should *never* be used in production."""
-    # TODO: Eventually, this token should actually be JWT-encoded.
-    return {'username': token}
+    if type(token) == str:
+        return {
+            'username': token,
+            'authid': token,
+        }
+    else:
+        return {}
+
+def validate_google_auth_token(token):
+    # Use google-auth API to decode and verify the token.
+    decoded = google_id_token.verify_oauth2_token(
+        token['tokenId'],
+        google_requests.Request(),
+        current_app.config['GOOGLE_AUTH_CLIENT'],
+    )
+
+    # Make sure it's actually from Google.
+    if decoded['iss'] not in \
+            ['accounts.google.com', 'https://accounts.google.com']:
+        return {}
+
+    # Return only the data we're interested in
+    # (email address and unique Google ID).
+    return {
+        'username': decoded['email'],
+        'authid': decoded['sub'],
+    }
 
 def encode_wart_token(mongo_data):
     """Creates the token which will be passed to us for all future requests
     from the frontend. Also enters the token in the DB."""
     # TODO: JWT-encode this and maybe some other security.
-    return None, {'username': mongo_data['username'],
-                  'user': str(mongo_data['_id'])}
+    # TODO: Actually create session in Mongo.
+    return None, {
+        'user': mongo_data['authid'],
+    }
 
 
-# Now for the actual authentication/registration methods.
+# Now for the actual authentication endpoints.
 class Authentication(Resource):
     def get(self):
         """GET /api/v1/auth
         Checks a provided Authorization header and replies with the
         decoded auth header if it is valid. Empty response otherwise."""
-        auth_data = decode_auth_header(request.headers.get('Authorization'))
-        if valid_wart_token(auth_data):
+        auth_data = validate_wart_token(request.headers.get('Authorization'))
+        if 'user' in auth_data:
             return auth_data
         else:
             abort(401)
@@ -73,30 +98,48 @@ class Authentication(Resource):
         args = request.get_json(force=True)
         db = get_db()
 
-        decoded_token = validate_simple_auth_token(args['token'])
+        # Allow simple auth in dev mode.
+        if current_app.config['ENV'] == 'development' \
+                and type(args['token']) == str:
+            auth_method = 'simple'
+            decoded_token = validate_simple_auth_token(args['token'])
+        # In all other environments, require Google Auth.
+        else:
+            auth_method = 'google'
+            decoded_token = validate_google_auth_token(args['token'])
 
         # If the token is not valid, return 401.
-        if 'username' not in decoded_token:
+        if 'authid' not in decoded_token:
             abort(401)
 
-        # We have a username. Make sure there is a row in the DB with upsert.
+        # We have an ID. Make sure there is a row in the DB with upsert.
         # We don't care if the user has "registered" previously, because our
         # authentication is already handled by a 3rd-party which prevents bots.
         db.get_collection('users').update_one(
-            {'username': decoded_token['username']},
-            {'$set': {'username': decoded_token['username']}},
+            {'authid': decoded_token['authid']},
+            {'$set': {
+                'authid': decoded_token['authid'],
+                'auth_method': auth_method,
+            }},
             upsert=True)
-        # Now that the user is guaranteed existing, find their ObjectId.
+        # Now that the user is guaranteed existing, find their document.
         user_mongo = db.get_collection('users').find_one(
-            {'username': decoded_token['username']})
+            {'authid': decoded_token['authid']})
 
         # We have a valid token for a valid user. Create a session for them.
         expiry_date, new_token = encode_wart_token(user_mongo)
         return {
             'expiry_date': expiry_date,
-            'username': user_mongo['username'],
+            'username': decoded_token['username'],
+            'auth_method': auth_method,
             'token': new_token,
         }
+
+# And the logout endpoint.
+class Logout(Resource):
+    def post(self):
+        # TODO: Actually delete session in Mongo.
+        return {}
 
 # Check the auth header before every request.
 bp = Blueprint('auth', __name__)
@@ -106,3 +149,4 @@ def load_auth_user():
 
 api = Api(bp)
 api.add_resource(Authentication, '/api/v1/auth')
+api.add_resource(Logout, '/api/v1/logout')

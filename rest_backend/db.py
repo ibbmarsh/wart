@@ -5,7 +5,10 @@ from datetime import datetime
 def get_db():
     """Keeps a single connection available throughout a request's lifetime."""
     if 'db' not in g:
-        client = pymongo.MongoClient('wart_mongo_1', 27017)
+        client = pymongo.MongoClient(
+            current_app.config['DATABASE_URI'],
+            current_app.config['DATABASE_PORT']
+        )
         g.db_client = client
         g.db = client.wart
     return g.db

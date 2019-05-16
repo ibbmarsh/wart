@@ -1,4 +1,5 @@
 import os
+import sys
 
 from flask import Flask
 from flask_cors import CORS
@@ -12,9 +13,19 @@ def create_app(test_config=None):
     # TODO: maybe also use CORS for staging/production in case we want
     #       the REST API to run on a different domain.
 
+    # We need to allow Python-style binary strings and standard strings.
+    # Easiest way is to read as string, then check if the first two chars
+    # are "b'". If they are, eval the string to create binary.
+    # I could probably just go with the standard string, but I'm obstinate.
+    secret = os.getenv('FLASK_SECRET')
+    if secret[0:2] == "b'":
+        secret = eval(secret)
+
     app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+        SECRET_KEY=secret,
+        DATABASE_URI='wart_mongo_1',
+        DATABASE_PORT=27017,
+        GOOGLE_AUTH_CLIENT=os.getenv('GOOGLE_AUTH_CLIENT'),
     )
 
     if test_config is None:

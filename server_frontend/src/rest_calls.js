@@ -10,7 +10,7 @@ class RestCalls {
 
   axiosCall(method, endpoint, data) {
     const cookies = new Cookies();
-    const auth_data = JSON.stringify(cookies.get("auth-token"));
+    const auth_data = JSON.stringify(cookies.get("wart-token"));
     if (method === "GET") {
       return axios.get(this.baseUrl+endpoint,
         {headers: {Authorization: auth_data}});
@@ -29,6 +29,10 @@ class RestCalls {
 
   login(token) {
     return this.axiosCall("POST", "/api/v1/auth", {'token': token});
+  }
+
+  logout() {
+    return this.axiosCall("POST", "/api/v1/logout");
   }
 
   refreshAllREST() {

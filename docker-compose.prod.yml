@@ -10,15 +10,17 @@ services:
 
   rest_backend:
     image: ibbathon/wart_rest_backend
+    env_file: prod.env
+    env_file: ../secrets/wart/flask.prod
     environment:
       FLASK_ENV: production
-      FLASK_SECRET: blah
     ports:
       - "50001:80"
     working_dir: /rest_backend
 
   server_frontend:
     image: ibbathon/wart_server_frontend
+    env_file: prod.env
     environment:
       NODE_ENV: production
     ports:

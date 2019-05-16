@@ -21,7 +21,7 @@ class WaRT extends React.Component {
   constructor(props) {
     super(props);
     // Set a default state before we try to render.
-    this.state = {
+    this.defaultState = {
       "primes": [],
       "relics": [],
       "primes_inventory": [],
@@ -30,22 +30,17 @@ class WaRT extends React.Component {
       "user_preferences": [],
       "last_updated": {},
     };
+    this.state = Object.assign({}, this.defaultState);
 
     this.onLogin = this.onLogin.bind(this);
+    this.onLogout = this.onLogout.bind(this);
+    this.onLoginFailure = this.onLoginFailure.bind(this);
     this.onCountChange = this.onCountChange.bind(this);
     this.onDesiredChange = this.onDesiredChange.bind(this);
     this.onUserPrefChange = this.onUserPrefChange.bind(this);
     this.onBuildClick = this.onBuildClick.bind(this);
 
-    if (window.server_env === "development") {
-      this.restCalls = new RestCalls("http://localhost:50001");
-    } else if (window.server_env === "staging") {
-      this.restCalls = new RestCalls("https://staging.wart.ibbmarsh.com");
-    } else if (window.server_env === "production") {
-      this.restCalls = new RestCalls("https://wart.ibbmarsh.com");
-    } else {
-      throw new Error("NODE_ENV was not set on server. Contact administrator to fix this.");
-    }
+    this.restCalls = new RestCalls(window.rest_uri);
   }
 
   refreshAllREST() {
@@ -75,16 +70,45 @@ class WaRT extends React.Component {
   /*
    * Called when the user clicks login.
    */
-  onLogin(username) {
-    this.restCalls.login(username)
+  onLogin(token) {
+    // Tell WaRT to log us in (using given token from Google Auth).
+    this.restCalls.login(token)
     .then(response => {
-      const cookies = new Cookies();
-      cookies.set("auth-token",response.data.token);
-      cookies.set("username",response.data.username);
-      // We're logged in, so fill in the data.
-      this.gatherDataAndStartUpdater();
+      // token will only be available if login was successful.
+      if (response.data.token) {
+        const cookies = new Cookies();
+        cookies.set("wart-token",response.data.token);
+        cookies.set("username",response.data.username);
+        cookies.set("auth-method",response.data.auth_method);
+        // We're logged in, so fill in the data.
+        this.gatherDataAndStartUpdater();
+      }
     })
     .catch(error => console.error(error));
+  }
+
+  /*
+   * Called when the user clicks logout.
+   */
+  onLogout() {
+    // Tell WaRT backend to log us out.
+    this.restCalls.logout();
+    // Remove auth cookies and erase state so we're logged out on frontend.
+    const cookies = new Cookies();
+    cookies.remove("wart-token");
+    cookies.remove("username");
+    cookies.remove("auth-method");
+    this.setState(Object.assign({}, this.defaultState));
+    if ('checkIntervalID' in this.state) {
+      clearInterval(this.state.checkIntervalID);
+    }
+  }
+
+  /*
+   * Called when the user fails to login or logout.
+   */
+  onLoginFailure(error) {
+    console.error(error);
   }
 
   /*
@@ -227,6 +251,7 @@ class WaRT extends React.Component {
       const cookies = new Cookies();
       cookies.remove("username");
       cookies.remove("auth-token");
+      cookies.remove("auth-method");
     });
   }
 
@@ -264,6 +289,8 @@ class WaRT extends React.Component {
         <TabPanel>
           <About
             onLogin={this.onLogin}
+            onLogout={this.onLogout}
+            onLoginFailure={this.onLoginFailure}
           />
         </TabPanel>
         <TabPanel>
