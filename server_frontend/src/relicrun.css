@@ -8,7 +8,7 @@
 .relic-runner {
   flex: 1 100%;
   padding: 0.5em;
-  border: solid 1px #000;
+  border: solid 1px #999;
 }
 
 .era-select-wrapper {
@@ -43,7 +43,11 @@
 
 .rewards-list .reward {
   cursor: pointer;
-  border: solid 1px black;
+  border: none;
+}
+
+.rewards-list .reward:hover {
+  color: #00d;
 }
 
 .rewards-list .reward .reward-name {}
@@ -66,14 +70,15 @@
 
 .rewards-list .desire-description {
   margin: 5px 0px 0px 0px;
+  background: #ddd;
 }
 
 #desire-description-desired {
-  border: solid 1px red;
+  border: solid 1px darkred;
 }
 
 #desire-description-complete {
-  border: solid 1px blue;
+  border: solid 1px darkblue;
 }
 
 #desire-description-unneeded {
@@ -83,7 +88,7 @@
 .relic-list {
   flex: 1 100%;
   padding: 0.5em;
-  border: solid 1px #000;
+  border: solid 1px #999;
 }
 
 .relic-list .description {
@@ -99,6 +104,10 @@
 
 .relic-list ul li {
   cursor: pointer;
+}
+
+.relic-list ul li:hover {
+  color: #00d;
 }
 
 .relicrun-panes .ducats-bar {

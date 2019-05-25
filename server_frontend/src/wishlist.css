@@ -3,16 +3,16 @@
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  height: 850px;
+  height: 100%;
   align-content: flex-start;
 }
 
 .wishlist-row {
   display: flex;
   flex-direction: row;
-  border: solid 1px #000;
-  width: 15em;
-  padding: 2px 0px 2px 1px;
+  border: solid 1px #999;
+  width: fit-content;
+  padding: 2px 2px 2px 2px;
   margin: 0px 5px 2px 0px;
 }
 
@@ -25,4 +25,22 @@
 
 .wishlist-row input[type="button"] {
   margin-left: 5px;
+}
+
+.wishlist-row input[type="button"]:disabled {
+  color: rgba(0,0,0,0);
+  background-color: rgba(0,0,0,0);
+  border-color: rgba(0,0,0,0);
+}
+
+@media all and (min-width: 500px) {
+  .wishlist-list {
+    height: 1250px;
+  }
+}
+
+@media all and (min-width: 750px) {
+  .wishlist-list {
+    height: 850px;
+  }
 }

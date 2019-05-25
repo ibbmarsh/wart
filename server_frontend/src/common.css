@@ -2,3 +2,8 @@ body {
   font: 14px "Century Gothic", Futura, sans-serif;
   margin: 2em;
 }
+
+a {
+  color: #88f;
+  text-decoration: none;
+}

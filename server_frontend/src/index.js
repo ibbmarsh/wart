@@ -31,7 +31,7 @@ class WaRT extends React.Component {
       "desired": [],
       "user_preferences": [],
       "last_updated": {},
-      "theme": "dark",
+      "theme": "light",
     };
     this.state = Object.assign({}, this.defaultState);
 
@@ -258,6 +258,13 @@ class WaRT extends React.Component {
       cookies.remove("auth-token");
       cookies.remove("auth-method");
     });
+
+    // Check for theme cookie.
+    const cookies = new Cookies();
+    const theme = cookies.get("theme");
+    if (theme !== undefined) {
+      this.changeTheme(theme);
+    }
   }
 
   gatherDataAndStartUpdater() {
@@ -282,6 +289,12 @@ class WaRT extends React.Component {
 
   handleThemeChange(e) {
     const newTheme = e.target.dataset.theme;
+    this.changeTheme(newTheme);
+  }
+
+  changeTheme(newTheme) {
+    const cookies = new Cookies();
+    cookies.set("theme", newTheme);
     const newState = Object.assign({}, this.state, {
       "theme": newTheme
     });
@@ -293,12 +306,16 @@ class WaRT extends React.Component {
     return (
       <Tabs>
         <link rel="stylesheet" type="text/css" href={stylePath} />
-        <input type="button" value="Dark" data-theme="dark"
-          onClick={this.handleThemeChange} />
-        <input type="button" value="Bland" data-theme="bland"
-          onClick={this.handleThemeChange} />
+        <div id="theme-buttons">
+          <input type="button" value="Light" data-theme="light"
+            className={this.state.theme === "light" ? "selected" : ""}
+            onClick={this.handleThemeChange} />
+          <input type="button" value="Dark" data-theme="dark"
+            className={this.state.theme === "dark" ? "selected" : ""}
+            onClick={this.handleThemeChange} />
+        </div>
         <TabList>
-          <Tab><div className="logo"><span className="logo-spiffy">Wa</span>rframe <span className="logo-spiffy">R</span>elic <span className="logo-spiffy">T</span>racker</div></Tab>
+          <Tab data-tab="about"><div className="logo"><span className="logo-spiffy">Wa</span>rframe <span className="logo-spiffy">R</span>elic <span className="logo-spiffy">T</span>racker</div></Tab>
           <Tab>Inventory</Tab>
           <Tab>Wishlist</Tab>
           <Tab>Salables</Tab>

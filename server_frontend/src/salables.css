@@ -4,12 +4,16 @@
   flex-direction: column;
 }
 
+.salables-list .description {
+  margin-bottom: 5px;
+}
+
 .salables-row {
   display: flex;
   flex-direction: row;
-  border: solid 1px #000;
-  width: 30em;
-  padding: 2px 0px 2px 1px;
+  border: solid 1px #999;
+  width: fit-content;
+  padding: 2px 2px 2px 2px;
   margin: 0px 5px 2px 0px;
 }
 
@@ -18,8 +22,9 @@
 }
 
 .salables-row .ducats {
-  width: 10em;
+  width: 11em;
   text-align: left;
+  margin-right: 1px;
 }
 
 .salables-row .plat {

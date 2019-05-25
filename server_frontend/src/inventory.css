@@ -11,6 +11,10 @@
   margin-bottom: 5px;
 }
 
+.prime_row:nth-child(odd) div {
+  background-color: #ddd;
+}
+
 .prime_row label {
   white-space: nowrap;
 }
@@ -18,12 +22,13 @@
 .prime_row .parts {
   display: flex;
   flex-direction: row;
+  width: fit-content;
 }
 
 .prime_row .prime {
   width: 15em;
   padding: 1px 5px 1px 1px;
-  border: solid 1px #000;
+  border: solid 1px #999;
 }
 
 .prime_row .prime label {
@@ -32,18 +37,14 @@
 }
 
 .prime_row .part {
-  width: 5em;
+  width: 5.5em;
   padding: 1px 5px 1px 1px;
-  border: solid 1px #000;
+  border: solid 1px #999;
 }
 
 .prime_row .part label {
   display: block;
   width: 8em;
-}
-
-.prime_row .parts {
-  width: 80%;
 }
 
 .primes_list input {

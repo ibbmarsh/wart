@@ -86,22 +86,20 @@ class About extends React.Component {
     }
     return (
       <div className="about-panel">
-        <div className="about-blather">
-          <p>This is WaRT, the Warframe Relic Tracker.</p>
-          <p>You can find the source for this server on its <a target="_blank" rel="noopener noreferrer" href="https://github.com/ibbmarsh/wart">GitHub repo</a> and a roadmap on <a target="_blank" rel="noopener noreferrer" href="https://trac.ibbathon.com">my Trac site</a>.</p>
-          <p>To use this site:</p>
-            <ol>
-              <li>Log in via the Google Sign-in link.</li>
-              <li>Enter your entire prime inventory on the Inventory tab.</li>
-              <li>Select which primes you wish to prioritize on the Wishlist page.</li>
-              <li>Use the Relic Run tab when running fissures to determine which reward to pick.</li>
-              <li>Use the Salables tab to determine which prime parts are safe to sell.</li>
-            </ol>
-          <p>Note that no data will appear until you sign in. This is partially to reduce strain on my puny personal server, and partially because I do not care about your silly privacy concerns. But that's a rant for another time. :P</p>
-          <p>In case you want to know exactly what information we collect and store, you can view <a target="_blank" rel="noopener noreferrer" href="/privacy.html">WaRT's privacy policy</a>.</p>
-        </div>
         <div>
           {loginButtons}
+        </div>
+        <div className="about-blather">
+          <p>To use this site:</p>
+          <ol>
+            <li>Log in via the Google Sign-in link.</li>
+            <li>Enter your entire prime inventory on the Inventory tab.</li>
+            <li>Select which primes you wish to prioritize on the Wishlist page.</li>
+            <li>Use the Relic Run tab when running fissures to determine which reward to pick.</li>
+            <li>Use the Salables tab to determine which prime parts are safe to sell.</li>
+          </ol>
+          <p>Note that no data will appear until you sign in. This is mostly to reduce strain on our puny personal server, but also to reduce the potential for griefing. In case you want to know exactly what information we collect and store, you can view <a target="_blank" rel="noopener noreferrer" href="/privacy.html">WaRT's privacy policy</a>.</p>
+          <p>You can find the source for this server on its <a target="_blank" rel="noopener noreferrer" href="https://github.com/ibbmarsh/wart">GitHub repo</a> and a roadmap on <a target="_blank" rel="noopener noreferrer" href="https://trac.ibbathon.com">our Trac site</a>.</p>
         </div>
       </div>
     );

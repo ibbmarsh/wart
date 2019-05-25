@@ -1,8 +1,83 @@
+/* Common */
 body {
   color: #fff;
   background: #000;
 }
+a {
+  color: #660;
+}
 
-.prime_row .prime {
-  border: solid 2px #fff;
+/* Tabs and panels */
+.logo {
+  color: #999;
+}
+.logo-spiffy {
+  color: #fff;
+}
+.react-tabs__tab--selected {
+  background: #666600;
+}
+
+/* Theming buttons */
+#theme-buttons input {
+  border-color: #000;
+}
+
+/* Ducats Bar */
+.Collapsible {
+  border-color: white;
+}
+.Collapsible__trigger {
+  background: #220;
+}
+
+/* Inventory */
+.prime_row input {
+  color: #fff;
+  background-color: #000;
+  border: solid 1px #999;
+}
+.prime_row:nth-child(odd) div {
+  background-color: #222;
+}
+
+/* Relic Run */
+.reward {
+  color: #000;
+}
+.rewards-list .desire-description {
+  background: #222;
+}
+.relic-list ul li:hover {
+  color: #44d;
+}
+select {
+  color: #fff;
+  background: #000;
+}
+select:hover {
+  border-color: #fff;
+}
+
+/* Salables */
+.salables-row input {
+  color: #fff;
+  background: #222;
+  border: solid 1px #999;
+}
+.salables-row input:hover {
+  border-color: #fff;
+}
+
+/* Wishlist */
+.wishlist-row input[type="button"] {
+  color: #fff;
+  background: #222;
+  border: solid 1px #999;
+}
+.wishlist-row input[type="button"]:hover {
+  border-color: #fff;
+}
+.wishlist-row input[type="button"]:hover:disabled {
+  border-color: rgba(0,0,0,0);
 }
