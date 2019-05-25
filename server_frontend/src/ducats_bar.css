@@ -1,0 +1,49 @@
+/* Ducats Bar */
+.Collapsible {
+  width: fit-content;
+  border: solid 1px black;
+  margin-bottom: 1em;
+}
+
+.Collapsible__trigger {
+  display: block;
+  background: #ddf;
+  position: relative;
+  padding: 5px;
+}
+
+.Collapsible__trigger:after {
+  content: "V";
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  display: block;
+}
+
+.Collapsible__trigger.is-open:after {
+  transform: rotateZ(180deg);
+}
+
+.Collapsible__contentInner {
+  padding: 5px;
+}
+
+.ducats-inputs {
+  display: flex;
+  flex-direction: column;
+}
+
+.ducats-input {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.ducats-input label {
+  padding-right: 5px;
+  flex: 0 12em;
+}
+
+.ducats-input input {
+  flex: 0 1em;
+}

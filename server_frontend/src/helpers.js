@@ -139,6 +139,14 @@ function gatherSpareParts(primes, primesInventory, partsInventory, desired) {
   return spareParts;
 }
 
+function themeNameToPath(theme) {
+  if (theme === "dark") {
+    return "themes/dark.css";
+  } else {
+    return "themes/bland.css";
+  }
+}
+
 export {
   findPrimeAndComponentFromPartName,
   findItemByName,
@@ -147,4 +155,5 @@ export {
   buildLastUpdated,
   buildBuildClickData,
   gatherSpareParts,
+  themeNameToPath,
 }

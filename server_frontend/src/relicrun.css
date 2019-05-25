@@ -1,0 +1,122 @@
+/* Relic Run */
+.relicrun-panes {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.relic-runner {
+  flex: 1 100%;
+  padding: 0.5em;
+  border: solid 1px #000;
+}
+
+.era-select-wrapper {
+  display: flex;
+}
+
+.era-select-wrapper label {
+  width: 3em;
+}
+
+.era-select {}
+
+.code-select-wrapper {
+  display: flex;
+}
+
+.code-select-wrapper label {
+  width: 3em;
+}
+
+.code-select {}
+
+.rewards-list {
+  list-style: none;
+  margin: 0px;
+  padding: 10px 0px 0px 0px;
+}
+
+.rewards-list .rewards-description {
+  padding: 5px 0px 5px 0px;
+}
+
+.rewards-list .reward {
+  cursor: pointer;
+  border: solid 1px black;
+}
+
+.rewards-list .reward .reward-name {}
+
+.rewards-list .reward .reward-ducats {
+  float: right;
+}
+
+.rarity-common {
+  background: #b45f06;
+}
+
+.rarity-uncommon {
+  background: #666666;
+}
+
+.rarity-rare {
+  background: #bf9000;
+}
+
+.rewards-list .desire-description {
+  margin: 5px 0px 0px 0px;
+}
+
+#desire-description-desired {
+  border: solid 1px red;
+}
+
+#desire-description-complete {
+  border: solid 1px blue;
+}
+
+#desire-description-unneeded {
+  border: solid 1px grey;
+}
+
+.relic-list {
+  flex: 1 100%;
+  padding: 0.5em;
+  border: solid 1px #000;
+}
+
+.relic-list .description {
+  min-height: 6em;
+  padding-bottom: 1em;
+}
+
+.relic-list ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+.relic-list ul li {
+  cursor: pointer;
+}
+
+.relicrun-panes .ducats-bar {
+  flex: 1 100%;
+  flex-wrap: wrap;
+}
+
+@media all and (min-width: 500px) {
+  .relic-list {
+    flex: 1 25%;
+  }
+}
+
+@media all and (min-width: 750px) {
+  .relic-runner {
+    flex: 2 40%;
+  }
+  .relic-list {
+    flex: 1 15%;
+  }
+}

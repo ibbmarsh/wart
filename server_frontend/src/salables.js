@@ -7,6 +7,8 @@ import {
   gatherSpareParts,
 } from './helpers.js';
 
+import './salables.css';
+
 class SalablesRow extends React.Component {
   constructor(props) {
     super(props);

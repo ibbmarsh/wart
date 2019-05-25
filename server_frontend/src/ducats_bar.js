@@ -5,6 +5,8 @@ import {
   findItemByName,
 } from './helpers.js';
 
+import './ducats_bar.css';
+
 class DucatsInput extends React.Component {
   constructor(props) {
     super(props);

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import './inventory.css';
+
 class PrimeItem extends React.Component {
   constructor(props) {
     super(props);

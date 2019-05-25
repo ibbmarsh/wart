@@ -8,6 +8,8 @@ import {
   gatherSpareParts,
 } from './helpers.js';
 
+import './relicrun.css';
+
 class RewardRow extends React.Component {
   constructor(props) {
     super(props);

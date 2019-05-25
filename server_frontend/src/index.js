@@ -13,8 +13,10 @@ import { RelicRun } from './relicrun.js';
 import {
   buildLastUpdated,
   buildBuildClickData,
+  themeNameToPath,
 } from './helpers.js';
 
+import './common.css';
 import './index.css';
 
 class WaRT extends React.Component {
@@ -29,6 +31,7 @@ class WaRT extends React.Component {
       "desired": [],
       "user_preferences": [],
       "last_updated": {},
+      "theme": "dark",
     };
     this.state = Object.assign({}, this.defaultState);
 
@@ -39,6 +42,8 @@ class WaRT extends React.Component {
     this.onDesiredChange = this.onDesiredChange.bind(this);
     this.onUserPrefChange = this.onUserPrefChange.bind(this);
     this.onBuildClick = this.onBuildClick.bind(this);
+
+    this.handleThemeChange = this.handleThemeChange.bind(this);
 
     this.restCalls = new RestCalls(window.rest_uri);
   }
@@ -275,9 +280,23 @@ class WaRT extends React.Component {
     this.setState(newState);
   }
 
+  handleThemeChange(e) {
+    const newTheme = e.target.dataset.theme;
+    const newState = Object.assign({}, this.state, {
+      "theme": newTheme
+    });
+    this.setState(newState);
+  }
+
   render() {
+    const stylePath = themeNameToPath(this.state.theme);
     return (
       <Tabs>
+        <link rel="stylesheet" type="text/css" href={stylePath} />
+        <input type="button" value="Dark" data-theme="dark"
+          onClick={this.handleThemeChange} />
+        <input type="button" value="Bland" data-theme="bland"
+          onClick={this.handleThemeChange} />
         <TabList>
           <Tab><div className="logo"><span className="logo-spiffy">Wa</span>rframe <span className="logo-spiffy">R</span>elic <span className="logo-spiffy">T</span>racker</div></Tab>
           <Tab>Inventory</Tab>
