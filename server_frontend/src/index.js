@@ -80,9 +80,8 @@ class WaRT extends React.Component {
     this.restCalls.login(token)
     .then(response => {
       // token will only be available if login was successful.
-      if (response.data.token) {
+      if (response.data.username) {
         const cookies = new Cookies();
-        cookies.set("wart-token",response.data.token);
         cookies.set("username",response.data.username);
         cookies.set("auth-method",response.data.auth_method);
         // We're logged in, so fill in the data.
@@ -100,7 +99,6 @@ class WaRT extends React.Component {
     this.restCalls.logout();
     // Remove auth cookies and erase state so we're logged out on frontend.
     const cookies = new Cookies();
-    cookies.remove("wart-token");
     cookies.remove("username");
     cookies.remove("auth-method");
     this.setState(Object.assign({}, this.defaultState));
@@ -255,7 +253,6 @@ class WaRT extends React.Component {
       // Cookies are invalid, so get rid of them.
       const cookies = new Cookies();
       cookies.remove("username");
-      cookies.remove("auth-token");
       cookies.remove("auth-method");
     });
 

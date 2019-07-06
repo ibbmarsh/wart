@@ -9,7 +9,7 @@ def create_app(test_config=None):
 
     # Set up CORS, allowing different ports in development mode
     if app.config['ENV'] == 'development':
-        CORS(app)
+        CORS(app, supports_credentials=True)
     # TODO: maybe also use CORS for staging/production in case we want
     #       the REST API to run on a different domain.
 
@@ -20,12 +20,18 @@ def create_app(test_config=None):
     secret = os.getenv('FLASK_SECRET')
     if secret[0:2] == "b'":
         secret = eval(secret)
+    jwt_secret = os.getenv('JWT_SECRET')
+    if jwt_secret[0:2] == "b'":
+        jwt_secret = eval(jwt_secret)
 
     app.config.from_mapping(
         SECRET_KEY=secret,
+        JWT_SECRET=jwt_secret,
+        JWT_SECURE=app.config['ENV'] != 'development',
         DATABASE_URI='wart_mongo_1',
         DATABASE_PORT=27017,
         GOOGLE_AUTH_CLIENT=os.getenv('GOOGLE_AUTH_CLIENT'),
+        MAX_COOKIE_AGE=7 * 24*60*60, # stay for 7 days 
     )
 
     if test_config is None:

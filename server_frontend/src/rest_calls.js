@@ -1,25 +1,20 @@
 import axios from 'axios';
-import Cookies from 'universal-cookie';
 
 import { buildLastUpdated } from './helpers.js';
 
 class RestCalls {
   constructor(baseUrl) {
     this.baseUrl = baseUrl;
+    axios.defaults.withCredentials = true;
   }
 
   axiosCall(method, endpoint, data) {
-    const cookies = new Cookies();
-    const auth_data = JSON.stringify(cookies.get("wart-token"));
     if (method === "GET") {
-      return axios.get(this.baseUrl+endpoint,
-        {headers: {Authorization: auth_data}});
+      return axios.get(this.baseUrl+endpoint, { withCredentials: true });
     } else if (method === "PUT") {
-      return axios.put(this.baseUrl+endpoint, data,
-        {headers: {Authorization: auth_data}});
+      return axios.put(this.baseUrl+endpoint, data);
     } else if (method === "POST") {
-      return axios.post(this.baseUrl+endpoint, data,
-        {headers: {Authorization: auth_data}});
+      return axios.post(this.baseUrl+endpoint, data);
     }
   }
 

@@ -29,6 +29,7 @@ services:
       FLASK_ENV: development
       FLASK_APP: /rest_backend
       FLASK_SECRET: dev
+      JWT_SECRET: secret
     volumes:
       - ./rest_backend:/rest_backend
       - rest_backend_pip_modules:/rest_backend_pip_modules

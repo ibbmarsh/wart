@@ -1,8 +1,10 @@
 import sys
 import json
 import jwt
+import time
 from functools import wraps
-from flask import g, current_app, request, Blueprint
+from flask import g, current_app, request, Blueprint, after_this_request, \
+    Response
 from flask_restful import abort, Resource, Api
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
@@ -23,18 +25,22 @@ def get_user_id():
 
 def check_authenticated():
     g.user = None
-    auth_data = validate_wart_token(request.headers.get('Authorization'))
     try:
+        auth_data = validate_wart_token(request.cookies.get('jwt_token').encode('ascii'))
         g.user = auth_data['user']
         return True
     except:
         return False
 
-def validate_wart_token(auth_header):
+def validate_wart_token(jwt_token):
     # TODO: Have it actually decode the auth header somehow, such as JWT.
     try:
-        auth_header = json.loads(auth_header)
-        return {'user': auth_header['user']}
+        decoded_jwt = jwt.decode(
+            jwt_token,
+            current_app.config['JWT_SECRET'],
+            algorithm='HS256',
+        )
+        return {'user': decoded_jwt['user']}
     except:
         return {}
 
@@ -72,11 +78,40 @@ def validate_google_auth_token(token):
 def encode_wart_token(mongo_data):
     """Creates the token which will be passed to us for all future requests
     from the frontend. Also enters the token in the DB."""
-    # TODO: JWT-encode this and maybe some other security.
+    # TODO: Maybe some other security.
     # TODO: Actually create session in Mongo.
-    return None, {
-        'user': mongo_data['authid'],
-    }
+    expiry_date = time.time() + current_app.config['MAX_COOKIE_AGE']
+    encoded_jwt = jwt.encode(
+        {
+            'user': mongo_data['authid'],
+        },
+        current_app.config['JWT_SECRET'],
+        algorithm='HS256',
+    )
+    return expiry_date, encoded_jwt
+
+def create_session(expiry_date, encoded_jwt, user_id):
+    """Creates the session in mongo."""
+    db = get_db()
+    db.get_collection('sessions').update_one(
+        {'user_id': user_id, 'expiry_date': expiry_date},
+        {'$set': {
+            'user_id': user_id,
+            'expiry_date': expiry_date,
+            'encoded_jwt': encoded_jwt,
+        }},
+        upsert=True
+    )
+
+def validate_session(encoded_jwt, user_id):
+    user_session = db.get_collection('sessions').find_one(
+        {'user_id': user_id, 'encoded_jwt': encoded_jwt}
+    )
+    if user_session == None:
+        return False
+    if user_session['expiry_date'] < time.time():
+        return False
+    return True
 
 
 # Now for the actual authentication endpoints.
@@ -85,7 +120,7 @@ class Authentication(Resource):
         """GET /api/v1/auth
         Checks a provided Authorization header and replies with the
         decoded auth header if it is valid. Empty response otherwise."""
-        auth_data = validate_wart_token(request.headers.get('Authorization'))
+        auth_data = validate_wart_token(request.cookies.get('jwt_token'))
         if 'user' in auth_data:
             return auth_data
         else:
@@ -128,12 +163,27 @@ class Authentication(Resource):
 
         # We have a valid token for a valid user. Create a session for them.
         expiry_date, new_token = encode_wart_token(user_mongo)
-        return {
-            'expiry_date': expiry_date,
-            'username': decoded_token['username'],
-            'auth_method': auth_method,
-            'token': new_token,
-        }
+        create_session(expiry_date, new_token, decoded_token['authid'])
+
+        # Set the HTTP-only cookie for authentication
+        resp = Response(
+            json.dumps({
+                    'expiry_date': expiry_date,
+                    'username': decoded_token['username'],
+                    'auth_method': auth_method,
+            }),
+            201,
+            content_type='application/json'
+        )
+        resp.set_cookie(
+            'jwt_token',
+            new_token,
+            expires=expiry_date,
+            secure=current_app.config['JWT_SECURE'],
+            httponly=True,
+        )
+        return resp
+
 
 # And the logout endpoint.
 class Logout(Resource):
