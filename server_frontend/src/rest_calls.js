@@ -179,6 +179,10 @@ class RestCalls {
 
     return Promise.all([axios1,axios2]);
   }
+
+  onPrimeDataChange(data) {
+    return this.axiosCall("PUT", "/api/v1/universal_data", data);
+  }
 }
 
 export {

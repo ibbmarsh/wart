@@ -40,9 +40,14 @@ class PrimeItem extends React.Component {
       neededText = "/"+this.props.item.needed;
     }
 
+    // Strip off parent name and "blueprint" as they are
+    // not necessary in table format
     let labelText = this.props.item.name;
     if (this.props.parentName !== undefined) {
-      labelText = labelText.replace(this.props.parentName,"");
+      labelText = labelText.replace(this.props.parentName+' ','');
+    }
+    if (labelText.match(/ Blueprint/)) {
+      labelText = labelText.replace(' Blueprint','');
     }
 
     const primeId = this.props.item.name

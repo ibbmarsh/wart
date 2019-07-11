@@ -9,6 +9,7 @@ import { Inventory } from './inventory.js';
 import { Wishlist } from './wishlist.js';
 import { Salables } from './salables.js';
 import { RelicRun } from './relicrun.js';
+import { PrimeEditor } from './prime_editor.js';
 
 import {
   buildLastUpdated,
@@ -42,6 +43,7 @@ class WaRT extends React.Component {
     this.onDesiredChange = this.onDesiredChange.bind(this);
     this.onUserPrefChange = this.onUserPrefChange.bind(this);
     this.onBuildClick = this.onBuildClick.bind(this);
+    this.onPrimeDataChange = this.onPrimeDataChange.bind(this);
 
     this.handleThemeChange = this.handleThemeChange.bind(this);
 
@@ -192,6 +194,17 @@ class WaRT extends React.Component {
     .catch(error => console.error(error));
   }
 
+  /**
+   * Called when the prime data is changed (in the prime editor tab,
+   * only available to the admin).
+   */
+  onPrimeDataChange(name, text) {
+    this.updateState("primes", text);
+    this.restCalls.onPrimeDataChange(text)
+    .then(this.updateLastUpdated.bind(this, "universal_data"))
+    .catch(error => console.error(error));
+  }
+
   updateLastUpdated(target, response) {
     const newLastUpdated = buildLastUpdated(
       this.state, [response.data]);
@@ -300,6 +313,22 @@ class WaRT extends React.Component {
 
   render() {
     const stylePath = themeNameToPath(this.state.theme);
+    // Only show the prime editor tab if we're logged in as the admin user
+    // TODO: un-hardcode the admin user email address
+    const cookies = new Cookies();
+    let primeEditorTab = '';
+    let primeEditorPanel = '';
+    if (cookies.get('username') === 'doctorfears@gmail.com') {
+      primeEditorTab = (<Tab>Prime Editor</Tab>);
+      primeEditorPanel = (
+        <TabPanel>
+          <PrimeEditor
+            primes={this.state.primes}
+            onPrimeDataChange={this.onPrimeDataChange}
+          />
+        </TabPanel>
+      );
+    }
     return (
       <Tabs>
         <link rel="stylesheet" type="text/css" href={stylePath} />
@@ -317,6 +346,7 @@ class WaRT extends React.Component {
           <Tab>Wishlist</Tab>
           <Tab>Salables</Tab>
           <Tab>Relic Run</Tab>
+          {primeEditorTab}
         </TabList>
 
         <TabPanel>
@@ -366,6 +396,7 @@ class WaRT extends React.Component {
             onUserPrefChange={this.onUserPrefChange}
           />
         </TabPanel>
+        {primeEditorPanel}
       </Tabs>
     );
   }

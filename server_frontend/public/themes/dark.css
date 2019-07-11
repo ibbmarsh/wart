@@ -30,6 +30,11 @@ a {
 .Collapsible__trigger {
   background: #220;
 }
+.ducats-input > input {
+  color: #fff;
+  background: #000;
+  border: solid 1px #999;
+}
 
 /* Inventory */
 .prime_row input {
@@ -80,4 +85,15 @@ select:hover {
 }
 .wishlist-row input[type="button"]:hover:disabled {
   border-color: rgba(0,0,0,0);
+}
+
+/* Prime Editor */
+.prime-name {
+  color: #fff;
+  background: #000;
+  border: solid 1px #999;
+}
+.prime-text {
+  color: #fff;
+  background: #000;
 }

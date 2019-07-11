@@ -23,6 +23,7 @@ def create_app(test_config=None):
     jwt_secret = os.getenv('JWT_SECRET')
     if jwt_secret[0:2] == "b'":
         jwt_secret = eval(jwt_secret)
+    wart_admin_id = os.getenv('WART_ADMIN_ID')
 
     app.config.from_mapping(
         SECRET_KEY=secret,
@@ -32,6 +33,7 @@ def create_app(test_config=None):
         DATABASE_PORT=27017,
         GOOGLE_AUTH_CLIENT=os.getenv('GOOGLE_AUTH_CLIENT'),
         MAX_COOKIE_AGE=7 * 24*60*60, # stay for 7 days 
+        WART_ADMIN_ID=wart_admin_id,
     )
 
     if test_config is None:

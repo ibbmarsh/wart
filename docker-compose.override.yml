@@ -30,6 +30,7 @@ services:
       FLASK_APP: /rest_backend
       FLASK_SECRET: dev
       JWT_SECRET: secret
+      WART_ADMIN_ID: 116870404662302241707
     volumes:
       - ./rest_backend:/rest_backend
       - rest_backend_pip_modules:/rest_backend_pip_modules

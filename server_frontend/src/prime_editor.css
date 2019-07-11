@@ -1,0 +1,12 @@
+/* Prime Editor */
+.prime-editor {
+  display: flex;
+  flex-direction: column;
+}
+
+.prime-name {
+}
+
+.prime-text {
+  height: 50em;
+}
