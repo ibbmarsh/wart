@@ -187,7 +187,7 @@ function missionTableToRelicList(missionTable) {
     if (row.childNodes[0].text.match(/Relic/)) {
       const relicName = row.childNodes[0].text
                         .match(/(Lith|Meso|Neo|Axi) \w*/)[0]
-      if (unvaultedRelics.indexOf(relicName) !== -1) {
+      if (unvaultedRelics.indexOf(relicName) === -1) {
         unvaultedRelics.push(relicName);
       }
     }
