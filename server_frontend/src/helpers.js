@@ -10,7 +10,7 @@ function findPrimeAndComponentFromPartName(partName, primes) {
       return [prime, component];
     }
   }
-  return null;
+  return [null, null];
 }
 
 function findItemByName(name, stateArray) {
