@@ -43,7 +43,7 @@ class Desired(Resource):
             is_desired = prime['is_desired']
             if is_desired:
                 desired_collection.update_one(
-                    {'name': name},
+                    {'name': name, 'user_id': user_id},
                     {'$set': {
                         'name': name,
                         'user_id': user_id,
@@ -51,7 +51,8 @@ class Desired(Resource):
                     upsert=True
                 )
             else:
-                desired_collection.delete_one({'name': name})
+                desired_collection.delete_one(
+                    {'name': name, 'user_id': user_id})
         last_updated = set_collection_last_updated(desired_collection, user_id)
 
         return {

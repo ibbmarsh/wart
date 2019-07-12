@@ -42,7 +42,7 @@ class UserPreferences(Resource):
         for pref in args.get('user_preferences', []):
             pref['user_id'] = user_id
             user_preferences_collection.update_one(
-                {'name': pref['name']},
+                {'name': pref['name'], 'user_id': user_id},
                 {'$set': pref},
                 upsert=True
             )

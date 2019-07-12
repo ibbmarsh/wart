@@ -26,14 +26,16 @@ def get_user_id():
 def check_authenticated():
     g.user = None
     try:
-        auth_data = validate_wart_token(request.cookies.get('jwt_token').encode('ascii'))
-        g.user = auth_data['user']
-        return True
-    except:
+        token = request.cookies.get('jwt_token').encode('ascii')
+        auth_data = validate_wart_token(token)
+        if validate_session(token, auth_data['user']):
+            g.user = auth_data['user']
+            return True
+        return False
+    except Exception as e:
         return False
 
 def validate_wart_token(jwt_token):
-    # TODO: Have it actually decode the auth header somehow, such as JWT.
     try:
         decoded_jwt = jwt.decode(
             jwt_token,
@@ -72,14 +74,13 @@ def validate_google_auth_token(token):
     # (email address and unique Google ID).
     return {
         'username': decoded['email'],
-        'authid': decoded['sub'],
+        'authid': decoded['email'],
     }
 
 def encode_wart_token(mongo_data):
     """Creates the token which will be passed to us for all future requests
     from the frontend. Also enters the token in the DB."""
     # TODO: Maybe some other security.
-    # TODO: Actually create session in Mongo.
     expiry_date = time.time() + current_app.config['MAX_COOKIE_AGE']
     encoded_jwt = jwt.encode(
         {
@@ -94,9 +95,14 @@ def create_session(expiry_date, encoded_jwt, user_id):
     """Creates the session in mongo."""
     db = get_db()
     db.get_collection('sessions').update_one(
-        {'user_id': user_id, 'expiry_date': expiry_date},
+        {
+            'user_id': user_id,
+            'remote_addr': request.remote_addr,
+            'encoded_jwt': encoded_jwt,
+        },
         {'$set': {
             'user_id': user_id,
+            'remote_addr': request.remote_addr,
             'expiry_date': expiry_date,
             'encoded_jwt': encoded_jwt,
         }},
@@ -104,13 +110,17 @@ def create_session(expiry_date, encoded_jwt, user_id):
     )
 
 def validate_session(encoded_jwt, user_id):
-    user_session = db.get_collection('sessions').find_one(
-        {'user_id': user_id, 'encoded_jwt': encoded_jwt}
-    )
+    db = get_db()
+    user_session = db.get_collection('sessions').find_one({
+        'user_id': user_id,
+        'encoded_jwt': encoded_jwt,
+        'remote_addr': request.remote_addr
+    })
     if user_session == None:
         return False
     if user_session['expiry_date'] < time.time():
         return False
+    # TODO: Figure out a way to renew the cookie
     return True
 
 

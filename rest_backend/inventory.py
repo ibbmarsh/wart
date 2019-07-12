@@ -59,7 +59,7 @@ class Inventory(Resource):
         for prime in args.get('primes_inventory', []):
             prime['user_id'] = user_id
             primes_inventory_collection.update_one(
-                {'name': prime['name']},
+                {'name': prime['name'], 'user_id': user_id},
                 {'$set': prime},
                 upsert=True
             )
@@ -71,7 +71,7 @@ class Inventory(Resource):
         for part in args.get('parts_inventory', []):
             part['user_id'] = user_id
             parts_inventory_collection.update_one(
-                {'name': part['name']},
+                {'name': part['name'], 'user_id': user_id},
                 {'$set': part},
                 upsert=True
             )

@@ -34,6 +34,8 @@ def create_app(test_config=None):
         GOOGLE_AUTH_CLIENT=os.getenv('GOOGLE_AUTH_CLIENT'),
         MAX_COOKIE_AGE=7 * 24*60*60, # stay for 7 days 
         WART_ADMIN_ID=wart_admin_id,
+        SESSION_COOKIE_SECURE=app.config['ENV'] != 'development',
+        SESSION_COOKIE_HTTPONLY=True,
     )
 
     if test_config is None:
