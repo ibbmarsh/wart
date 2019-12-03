@@ -249,6 +249,11 @@ function relicTableToLists(relicTable, unvaultedRelics) {
     if (!header.match(/(Intact)/)) {
       continue;
     }
+    // For now, skip Requiem relics. Adding them will take a lot of work,
+    // and their presence is currently breaking the relic-reader.
+    if (header.match(/Requiem/)) {
+      continue;
+    }
 
     let relic = {};
     relic.name = header.replace(/ Relic \(Intact\)/,'');
